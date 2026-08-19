@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CapWell Rewards Simulator</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#ffffff;--bg-secondary:#f5f5f3;--bg-tertiary:#eeede8;--text-primary:#1a1a18;--text-secondary:#5a5a57;--text-tertiary:#8a8a86;--border:rgba(0,0,0,0.12);--border-md:rgba(0,0,0,0.22);--border-strong:rgba(0,0,0,0.35);--green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;--green-text:#0F6E56;--red:#D85A30;--orange:#EF9F27;--blue:#378ADD;--purple:#8B5CF6;--radius-md:8px;--radius-lg:12px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg-tertiary);color:var(--text-primary);min-height:100vh;padding:2rem 1rem}
+.page-wrap{max-width:760px;margin:0 auto}
+.page-header{margin-bottom:2rem}
+.page-header h1{font-size:22px;font-weight:500;color:var(--text-primary);margin-bottom:4px}
+.page-header p{font-size:14px;color:var(--text-tertiary)}
+.section-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin:0 0 10px}
+.card{background:var(--bg);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:12px}
+.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.metric{background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px 14px}
+.metric-label{font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+.metric-val{font-size:22px;font-weight:500;color:var(--text-primary)}
+.metric-val-green{font-size:22px;font-weight:500;color:var(--green)}
+.metric-sub{font-size:11px;color:var(--text-tertiary);margin-top:2px}
+.row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.row-label{font-size:13px;color:var(--text-secondary);min-width:180px}
+.row-val{font-size:13px;font-weight:500;color:var(--text-primary);min-width:50px;text-align:right}
+input[type=range]{flex:1;accent-color:var(--green)}
+input[type=number],input[type=text]{background:var(--bg);color:var(--text-primary);border:.5px solid var(--border-md);border-radius:var(--radius-md);padding:5px 8px;font-size:13px;font-family:inherit}
+input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--green)}
+.progress-area{margin:6px 0 8px}
+.milestone-labels{position:relative;height:18px;margin-bottom:4px}
+.milestone-label-above{position:absolute;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%)}
+.milestone-label-pts{font-size:10px;color:var(--text-tertiary);white-space:nowrap}
+.milestone-label-pts.earned{color:var(--green);font-weight:500}
+.progress-track{height:10px;background:var(--bg-secondary);border-radius:5px;position:relative;overflow:hidden}
+.progress-segs{position:absolute;inset:0;display:flex}
+.progress-seg{height:100%;flex-shrink:0;transition:width .25s ease}
+.progress-cap-line{position:absolute;top:-3px;width:2px;height:16px;background:var(--green-dark);border-radius:1px;z-index:2}
+.milestone-markers{position:relative;height:20px;margin-top:2px}
+.milestone-tick{position:absolute;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%)}
+.milestone-line{width:1px;height:8px;background:var(--border-md)}
+.milestone-lbl{font-size:10px;color:var(--text-tertiary);white-space:nowrap;margin-top:2px}
+.milestone-earned{color:var(--green)!important;font-weight:500}
+.breakdown-legend{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 10px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary)}
+.legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.legend-pts{font-weight:500;color:var(--text-primary)}
+.reward-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--radius-md);font-size:12px;font-weight:500;margin-right:6px;margin-bottom:6px}
+.badge-earned{background:var(--green-light);color:var(--green-text)}
+.badge-pending{background:var(--bg-secondary);color:var(--text-tertiary)}
+.divider{border:none;border-top:.5px solid var(--border);margin:14px 0}
+.tab-nav{margin-bottom:14px}
+.tab-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tab-group+.tab-group{margin-top:6px;padding-top:6px;border-top:.5px solid var(--border)}
+.tab-group-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text-tertiary);white-space:nowrap;min-width:60px}
+.tab{padding:6px 14px;border-radius:var(--radius-md);border:.5px solid var(--border-md);font-size:13px;cursor:pointer;background:transparent;color:var(--text-secondary);font-family:inherit}
+.tab:hover{background:var(--bg-secondary)}
+.tab.active{background:var(--bg-secondary);color:var(--text-primary);font-weight:500;border-color:var(--border-strong)}
+.month-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:8px 0 4px}
+.month-box{display:flex;flex-direction:column;align-items:center;gap:4px}
+.month-box input{accent-color:var(--green);width:15px;height:15px;cursor:pointer}
+.month-box label{font-size:11px;color:var(--text-tertiary);cursor:pointer}
+.monthly-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.monthly-pts{font-size:12px;color:var(--text-tertiary)}
+.select-links{display:flex;gap:8px}
+.sel-link{font-size:11px;color:var(--green);background:none;border:none;cursor:pointer;padding:0;font-family:inherit}
+.sel-link:hover{text-decoration:underline}
+.monthly-section{border-top:.5px solid var(--border);padding-top:12px;margin-top:12px}
+.config-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.config-row label{font-size:12px;color:var(--text-secondary);min-width:200px}
+.config-row input[type=number]{width:80px}
+.unit{font-size:12px;color:var(--text-tertiary)}
+.threshold-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px}
+.threshold-row input[type=number]{width:80px}
+.arrow{color:var(--text-tertiary)}
+.add-btn{font-size:12px;color:var(--green);border:none;background:none;cursor:pointer;padding:0;margin-top:4px;font-family:inherit}
+.add-btn:hover{text-decoration:underline}
+.del-btn{font-size:18px;line-height:1;color:var(--text-tertiary);border:none;background:none;cursor:pointer;padding:0 4px;font-family:inherit}
+.del-btn:hover{color:var(--text-primary)}
+.cap-note{font-size:11px;color:var(--text-tertiary);margin:2px 0 8px}
+.hint{font-size:12px;color:var(--text-tertiary);margin-top:6px}
+.monthly-cfg-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.monthly-cfg-row label{font-size:13px;color:var(--text-secondary);flex:1}
+.monthly-cfg-row input[type=number]{width:80px}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.card-pts-summary{text-align:right}
+.card-pts-label{font-size:11px;color:var(--text-tertiary);margin:0 0 2px}
+.card-pts-val{font-size:18px;font-weight:500;color:var(--green);margin:0}
+.redemption-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.redemption-row label{font-size:13px;color:var(--text-secondary);min-width:160px}
+.redemption-input{width:100px;padding:5px 8px;font-size:14px}
+.redemption-note{font-size:12px;color:var(--text-tertiary)}
+.streak-track{margin:14px 0 4px}
+.streak-track-label{font-size:11px;color:var(--text-tertiary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;font-weight:500}
+.streak-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.streak-step{border-radius:var(--radius-md);border:.5px solid var(--border);padding:10px 8px;text-align:center;background:var(--bg-secondary)}
+.streak-step.reached{background:var(--green-light);border-color:var(--green)}
+.streak-step.next{border:1.5px dashed var(--green)}
+.streak-week{font-size:11px;color:var(--text-tertiary);margin-bottom:3px}
+.streak-step.reached .streak-week,.streak-step.next .streak-week{color:var(--green)}
+.streak-pts{font-size:15px;font-weight:500;color:var(--text-primary)}
+.streak-step.reached .streak-pts,.streak-step.next .streak-pts{color:var(--green-dark)}
+.streak-status{font-size:10px;margin-top:3px;color:var(--text-tertiary)}
+.streak-step.reached .streak-status,.streak-step.next .streak-status{color:var(--green)}
+.streak-bonus-total{font-size:12px;color:var(--text-tertiary);margin-top:8px}
+.streak-bonus-total span{color:var(--green);font-weight:500}
+.readonly-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.readonly-row label{font-size:12px;color:var(--text-secondary);min-width:200px}
+.readonly-val{font-size:13px;font-weight:500;color:var(--green)}
+.readonly-formula{font-size:11px;color:var(--text-tertiary)}
+.derived-note{font-size:12px;color:var(--text-tertiary);margin:-4px 0 10px;padding:6px 10px;background:var(--bg-secondary);border-radius:var(--radius-md)}
+.derived-note span{color:var(--green);font-weight:500}
+.cfg-act-row{margin-bottom:12px;border:.5px solid var(--border);border-radius:var(--radius-md);padding:10px 12px}
+.cfg-act-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cfg-act-name{flex:1;min-width:0}
+.cfg-act-pts{width:80px;flex-shrink:0}
+.cfg-act-bottom{display:flex;align-items:center;gap:16px}
+.cfg-act-toggle{display:flex;align-items:center;gap:6px}
+.cfg-act-toggle input{accent-color:var(--green);width:14px;height:14px}
+.cfg-act-toggle label{font-size:12px;color:var(--text-secondary);white-space:nowrap;cursor:pointer}
+.cfg-act-toggle.gating-disabled{opacity:.35;pointer-events:none}
+.badge-gatekeeper{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--green-light);color:var(--green-text);font-weight:500;white-space:nowrap}
+.badge-gatekept{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--bg-secondary);color:var(--text-tertiary);font-weight:500;white-space:nowrap;border:.5px solid var(--border-md)}
+.badge-gatekept.locked{background:#fff3e0;color:#e65100;border-color:#ffcc80}
+.sim-act-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sim-act-check{accent-color:var(--green);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.sim-act-label{flex:1;font-size:13px;cursor:pointer}
+.sim-act-label.locked{color:var(--text-tertiary)}
+.sim-act-label.normal{color:var(--text-secondary)}
+.sim-act-pts{font-size:12px;white-space:nowrap}
+.sim-act-pts.earned{color:var(--green);font-weight:500}
+.sim-act-pts.locked-pts{color:var(--text-tertiary)}
+.gate-status{font-size:12px;padding:8px 12px;border-radius:var(--radius-md);margin-bottom:10px}
+.gate-status.unlocked{background:var(--green-light);color:var(--green-text)}
+.gate-status.locked{background:#fff3e0;color:#e65100;border:.5px solid #ffcc80}
+.gate-status.no-gate{display:none}
+.gate-toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 12px;border-radius:var(--radius-md);border:.5px solid var(--border-md);background:var(--bg-secondary)}
+.gate-toggle-row input{accent-color:var(--green);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.gate-toggle-row label{font-size:13px;color:var(--text-secondary);cursor:pointer;flex:1;font-weight:500}
+.gate-toggle-sub{font-size:11px;color:var(--text-tertiary);display:block;font-weight:400;margin-top:1px}
+.earnings-box{border:2px solid #1D9E75;border-radius:12px;padding:1.25rem 1.25rem 1rem;margin-bottom:20px;background:#ffffff}
+.earnings-box-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.earnings-box-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#1D9E75}
+.active-cfg-badge{font-size:10px;padding:2px 9px;border-radius:10px;background:var(--green-light);color:var(--green-text);font-weight:500;white-space:nowrap;display:none}
+.sub-tab-row{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap;border-bottom:.5px solid var(--border);padding-bottom:10px}
+.sub-tab{padding:4px 12px;border-radius:var(--radius-md);border:.5px solid var(--border-md);font-size:12px;cursor:pointer;background:transparent;color:var(--text-secondary);font-family:inherit}
+.sub-tab:hover{background:var(--bg-secondary)}
+.sub-tab.active{background:var(--green);color:#ffffff;font-weight:500;border-color:var(--green)}
+.sub-pane{display:none}
+.sub-pane.active{display:block}
+.save-input-row{display:flex;gap:8px;align-items:center}
+.save-input-row input{flex:1;font-size:13px}
+.save-btn{padding:6px 16px;border-radius:var(--radius-md);border:none;font-size:13px;cursor:pointer;background:var(--green);color:#fff;font-family:inherit;font-weight:500;white-space:nowrap}
+.save-btn:hover{background:var(--green-dark)}
+.saved-item{display:flex;align-items:center;gap:10px;padding:11px 13px;border:.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:8px}
+.saved-item.is-active{background:var(--green-light);border-color:var(--green)}
+.saved-item-info{flex:1;min-width:0}
+.saved-item-name{font-size:13px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.saved-item-meta{font-size:11px;color:var(--text-tertiary);margin-top:2px}
+.load-btn{font-size:12px;color:var(--green);border:.5px solid var(--green);background:transparent;cursor:pointer;padding:4px 11px;border-radius:var(--radius-md);font-family:inherit;white-space:nowrap}
+.load-btn:hover{background:var(--green-light)}
+.saved-empty{font-size:13px;color:var(--text-tertiary);text-align:center;padding:28px 0 8px}
+.inline-feedback{font-size:12px;color:var(--green);font-weight:500;min-width:60px}
+@media(max-width:520px){.metric-grid{grid-template-columns:repeat(2,1fr)}.month-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.row-label{min-width:120px}.streak-steps{grid-template-columns:repeat(3,1fr)}.tab-group-label{min-width:44px;font-size:9px}.save-input-row{flex-wrap:wrap}.breakdown-legend{gap:10px}}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<div class="page-header">
+  <h1>Healthcare rewards simulator</h1>
+  <p>Model annual points and reward earnings across habits, challenges, healthy actions, and learning tracks.</p>
+</div>
+
+<!-- EARNINGS BOX -->
+<div class="earnings-box">
+  <div class="earnings-box-header">
+    <span class="earnings-box-label">User earnings</span>
+    <span class="active-cfg-badge" id="active-cfg-badge"></span>
+  </div>
+  <div class="metric-grid" id="metrics"></div>
+  <div class="progress-area">
+    <div class="milestone-labels" id="milestone-labels-above"></div>
+    <div class="progress-track">
+      <div class="progress-segs">
+        <div class="progress-seg" id="bseg-habits"     style="background:#D85A30;width:0%"></div>
+        <div class="progress-seg" id="bseg-challenges" style="background:#EF9F27;width:0%"></div>
+        <div class="progress-seg" id="bseg-actions"    style="background:#378ADD;width:0%"></div>
+        <div class="progress-seg" id="bseg-learning"   style="background:#8B5CF6;width:0%"></div>
+      </div>
+      <div class="progress-cap-line" id="cap-line" style="left:80%"></div>
+    </div>
+    <div class="milestone-markers" id="milestone-markers"></div>
+  </div>
+  <div class="breakdown-legend" id="breakdown-legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#D85A30"></span>Habits: <span class="legend-pts">0 pts</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#EF9F27"></span>Challenges: <span class="legend-pts">0 pts</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#378ADD"></span>Healthy actions: <span class="legend-pts">0 pts</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#8B5CF6"></span>Learning tracks: <span class="legend-pts">0 pts</span></div>
+  </div>
+  <div class="cap-note" id="cap-note"></div>
+  <div id="badges" style="margin-bottom:4px"></div>
+</div>
+
+<!-- TAB NAV -->
+<div class="tab-nav">
+  <div class="tab-group">
+    <span class="tab-group-label">Simulate</span>
+    <button class="tab active" onclick="switchTab('habits')">Habits</button>
+    <button class="tab" onclick="switchTab('challenges')">Challenges</button>
+    <button class="tab" onclick="switchTab('learning')">Learning tracks</button>
+    <button class="tab" onclick="switchTab('activities')">Healthy actions</button>
+    <button class="tab" onclick="switchTab('redemption')">Redemption</button>
+  </div>
+  <div class="tab-group">
+    <span class="tab-group-label">Configuration</span>
+    <button class="tab" onclick="switchTab('global')">Global config</button>
+    <button class="tab" onclick="switchTab('config')">Client config</button>
+    <button class="tab" onclick="switchTab('saved');renderSavedConfigs()">Saved configs</button>
+  </div>
+</div>
+
+<!-- HABITS TAB -->
+<div id="tab-habits" class="card">
+  <div class="card-header">
+    <p class="section-label" style="margin:0">Habits</p>
+    <div class="card-pts-summary"><p class="card-pts-label">Total points earned from habits this year</p><p class="card-pts-val" id="habit-pts-total">0 pts</p></div>
+  </div>
+  <div class="row"><span class="row-label">Months completed</span><input type="range" min="0" max="12" step="1" id="sl-months" value="0" oninput="syncMonths('m');recalc()"><span class="row-val" id="out-months">0</span></div>
+  <div class="row"><span class="row-label">Habits completed / month</span><input type="range" min="0" max="5" step="1" id="sl-habits" value="0" oninput="recalc()"><span class="row-val" id="out-habits">0</span></div>
+  <div class="row"><span class="row-label">Avg completion %</span><input type="range" min="0" max="100" step="5" id="sl-habit-pct" value="100" oninput="recalc()"><span class="row-val" id="out-habit-pct">100%</span></div>
+  <div class="hint" id="hint-habits"></div>
+  <div class="streak-track">
+    <p class="streak-track-label">Consistency bonuses</p>
+    <div class="streak-steps" id="streak-steps"></div>
+    <p class="streak-bonus-total" id="streak-bonus-total"></p>
+  </div>
+</div>
+
+<!-- CHALLENGES TAB -->
+<div id="tab-challenges" class="card" style="display:none">
+  <div class="card-header">
+    <p class="section-label" style="margin:0">Challenges</p>
+    <div class="card-pts-summary"><p class="card-pts-label">Total points earned from challenges this year</p><p class="card-pts-val" id="challenge-pts-total">0 pts</p></div>
+  </div>
+  <div class="row"><span class="row-label">Months completed</span><input type="range" min="0" max="12" step="1" id="sl-months-c" value="0" oninput="syncMonths('c');recalc()"><span class="row-val" id="out-months-c">0</span></div>
+  <div class="row"><span class="row-label">Challenges completed / month</span><input type="range" min="0" max="4" step="1" id="sl-challenges" value="0" oninput="recalc()"><span class="row-val" id="out-challenges">0</span></div>
+  <div class="row"><span class="row-label">Avg completion %</span><input type="range" min="0" max="100" step="5" id="sl-challenge-pct" value="100" oninput="recalc()"><span class="row-val" id="out-challenge-pct">100%</span></div>
+  <div class="hint" id="hint-challenges"></div>
+</div>
+
+<!-- LEARNING TRACKS TAB -->
+<div id="tab-learning" class="card" style="display:none">
+  <div class="card-header">
+    <p class="section-label" style="margin:0">Learning tracks</p>
+    <div class="card-pts-summary"><p class="card-pts-label">Total points earned from learning tracks this year</p><p class="card-pts-val" id="learning-pts-total">0 pts</p></div>
+  </div>
+  <div class="row"><span class="row-label">Months completed</span><input type="range" min="0" max="12" step="1" id="sl-months-l" value="0" oninput="syncMonths('l');recalc()"><span class="row-val" id="out-months-l">0</span></div>
+  <div class="row"><span class="row-label">Learning tracks / month</span><input type="range" min="0" max="4" step="1" id="sl-learning" value="0" oninput="recalc()"><span class="row-val" id="out-learning">0</span></div>
+  <div class="row"><span class="row-label">Avg completion %</span><input type="range" min="0" max="100" step="5" id="sl-learning-pct" value="100" oninput="recalc()"><span class="row-val" id="out-learning-pct">100%</span></div>
+  <div class="hint" id="hint-learning"></div>
+</div>
+
+<!-- HEALTHY ACTIONS TAB -->
+<div id="tab-activities" class="card" style="display:none">
+  <div id="gate-status-bar" class="gate-status no-gate"></div>
+  <p class="section-label">One-time actions</p>
+  <div id="onetime-list"></div>
+  <div class="monthly-section">
+    <p class="section-label" style="margin-bottom:12px">Monthly goals — gym check-in</p>
+    <div class="monthly-header"><span class="monthly-pts" id="gym-pts-summary"></span><div class="select-links"><button class="sel-link" onclick="setAllMonthly('gym',true)">all</button><button class="sel-link" onclick="setAllMonthly('gym',false)">none</button></div></div>
+    <div class="month-grid" id="gym-months"></div>
+  </div>
+  <div class="monthly-section">
+    <p class="section-label" style="margin-bottom:12px">Monthly goals — step goal</p>
+    <div class="monthly-header"><span class="monthly-pts" id="steps-pts-summary"></span><div class="select-links"><button class="sel-link" onclick="setAllMonthly('steps',true)">all</button><button class="sel-link" onclick="setAllMonthly('steps',false)">none</button></div></div>
+    <div class="month-grid" id="steps-months"></div>
+  </div>
+</div>
+
+<!-- REDEMPTION TAB -->
+<div id="tab-redemption" class="card" style="display:none">
+  <p class="section-label">Redemption</p>
+  <div class="redemption-row"><label>Amount redeemed</label><span style="font-size:16px;color:var(--text-secondary)">$</span><input class="redemption-input" type="number" id="redemption-amt" min="0" value="0" step="1" oninput="clampRedemption();recalc()"></div>
+  <p class="redemption-note" id="redemption-note"></p>
+</div>
+
+<!-- GLOBAL CONFIG TAB -->
+<div id="tab-global" class="card" style="display:none">
+  <p class="section-label">Consistency bonus multipliers</p>
+  <p style="font-size:12px;color:var(--text-tertiary);margin:0 0 14px">Applied to points per weekly goal met to derive each consistency bonus amount.</p>
+  <div class="config-row"><label>4-week multiplier</label><input type="number" id="cfg-mult-4" min="0" step="0.5" value="2" oninput="recalc()"><span class="unit">x</span></div>
+  <div class="config-row"><label>8-week multiplier</label><input type="number" id="cfg-mult-8" min="0" step="0.5" value="4" oninput="recalc()"><span class="unit">x</span></div>
+  <div class="config-row" style="margin-bottom:0"><label>12-week multiplier</label><input type="number" id="cfg-mult-12" min="0" step="0.5" value="6" oninput="recalc()"><span class="unit">x</span></div>
+
+  <hr class="divider">
+  <p class="section-label">Habits</p>
+  <div class="config-row"><label>Points per daily check-in</label><input type="number" id="cfg-habit-daily" min="0" step="1" value="5" oninput="recalc()"><span class="unit">pts</span></div>
+  <div class="config-row"><label>Points per weekly goal met</label><input type="number" id="cfg-habit-weekly" min="0" step="5" value="50" oninput="recalc()"><span class="unit">pts</span></div>
+  <hr class="divider">
+  <p class="section-label">Consistency bonuses</p>
+  <p style="font-size:12px;color:var(--text-tertiary);margin:0 0 12px">Derived from points per weekly goal met × multiplier.</p>
+  <div class="readonly-row"><label>4-week bonus</label><span class="readonly-val" id="ro-bonus-4">--</span><span class="readonly-formula" id="ro-formula-4"></span></div>
+  <div class="readonly-row"><label>8-week bonus</label><span class="readonly-val" id="ro-bonus-8">--</span><span class="readonly-formula" id="ro-formula-8"></span></div>
+  <div class="readonly-row"><label>12-week bonus</label><span class="readonly-val" id="ro-bonus-12">--</span><span class="readonly-formula" id="ro-formula-12"></span></div>
+
+  <hr class="divider">
+  <p class="section-label">Challenges</p>
+  <div class="config-row"><label>Points per checkpoint</label><input type="number" id="cfg-challenge-checkpoint-pts" min="0" step="5" value="25" oninput="recalc()"><span class="unit">pts</span></div>
+  <div class="config-row"><label>Number of checkpoints</label><input type="number" id="cfg-challenge-checkpoints" min="0" step="1" value="4" oninput="recalc()"></div>
+  <div class="config-row" style="margin-bottom:4px"><label>Points per challenge completion</label><input type="number" id="cfg-challenge-completion-pts" min="0" step="25" value="150" oninput="recalc()"><span class="unit">pts</span></div>
+  <div class="derived-note" id="challenge-derived-note"></div>
+
+  <hr class="divider">
+  <p class="section-label">Limits</p>
+  <div class="config-row"><label>Max habits per month</label><input type="number" id="cfg-habit-max" min="1" step="1" value="5" oninput="syncHabitMax()"></div>
+  <div class="config-row" style="margin-bottom:0"><label>Max challenges per month</label><input type="number" id="cfg-challenge-max" min="1" step="1" value="4" oninput="syncChallengeMax()"></div>
+
+  <hr class="divider">
+  <p class="section-label">Learning tracks</p>
+  <div class="config-row"><label>Points per daily completion</label><input type="number" id="cfg-learning-daily" min="0" step="1" value="10" oninput="recalc()"><span class="unit">pts</span></div>
+  <div class="config-row" style="margin-bottom:4px"><label>Points per track completion</label><input type="number" id="cfg-learning-completion" min="0" step="10" value="100" oninput="recalc()"><span class="unit">pts</span></div>
+  <div class="derived-note" id="learning-derived-note"></div>
+  <div class="config-row" style="margin-bottom:0"><label>Max learning tracks per month</label><input type="number" id="cfg-learning-max" min="1" step="1" value="4" oninput="syncLearningMax()"></div>
+</div>
+
+<!-- CLIENT CONFIG TAB -->
+<div id="tab-config" class="card" style="display:none">
+  <div class="sub-tab-row">
+    <button class="sub-tab active" onclick="switchSubTab('cc-monthly')">Monthly goals</button>
+    <button class="sub-tab" onclick="switchSubTab('cc-actions')">Healthy actions</button>
+    <button class="sub-tab" onclick="switchSubTab('cc-thresholds')">Reward thresholds</button>
+  </div>
+
+  <!-- Monthly Goals -->
+  <div id="cc-monthly" class="sub-pane active">
+    <p class="section-label">Monthly goals</p>
+    <div class="monthly-cfg-row"><label>Pts per gym check-in month</label><input type="number" id="cfg-gym-pts" min="0" step="100" value="1000" oninput="recalc()"><span class="unit">pts</span></div>
+    <div class="monthly-cfg-row" style="margin-top:8px"><label>Pts per step goal month</label><input type="number" id="cfg-steps-pts" min="0" step="100" value="1000" oninput="recalc()"><span class="unit">pts</span></div>
+  </div>
+
+  <!-- Healthy Actions -->
+  <div id="cc-actions" class="sub-pane">
+    <p class="section-label">Healthy actions</p>
+    <div class="gate-toggle-row">
+      <input type="checkbox" id="cfg-no-gatekeepers" onchange="toggleNoGatekeepers()">
+      <div><label for="cfg-no-gatekeepers">No gatekeepers</label><span class="gate-toggle-sub">All healthy actions are independent — no activity is required before another</span></div>
+    </div>
+    <div id="cfg-onetime-list"></div>
+    <button class="add-btn" onclick="addOneTime()" style="margin-bottom:4px">+ add action</button>
+  </div>
+
+  <!-- Reward Thresholds -->
+  <div id="cc-thresholds" class="sub-pane">
+    <p class="section-label">Reward thresholds</p>
+    <p style="font-size:12px;color:var(--text-tertiary);margin:0 0 12px">Each threshold pays out independently when crossed. Total reward = sum of all crossed thresholds.</p>
+    <div id="threshold-list"></div>
+    <button class="add-btn" onclick="addThreshold()">+ add threshold</button>
+  </div>
+</div>
+
+<!-- SAVED CONFIGS TAB -->
+<div id="tab-saved" class="card" style="display:none">
+  <div class="card-header" style="margin-bottom:16px">
+    <p class="section-label" style="margin:0">Saved configurations</p>
+  </div>
+  <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:14px;margin-bottom:12px">
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Name and save a snapshot of all current configuration settings — multipliers, points, thresholds, and healthy actions.</p>
+    <div class="save-input-row">
+      <input type="text" id="save-name" placeholder="e.g. Acme Corp — Standard plan" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
+      <button class="save-btn" onclick="saveCurrentConfig()">Save config</button>
+      <span class="inline-feedback" id="save-feedback" style="display:none">Saved!</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:20px">
+    <span style="font-size:12px;color:var(--text-secondary);flex:1;min-width:160px">Share with a colleague — export the current config as a JSON file, or import one they sent you.</span>
+    <button class="save-btn" style="background:var(--bg-secondary);color:var(--text-primary);border:.5px solid var(--border-md)" onclick="exportCurrentConfig()">↓ Export current</button>
+    <label class="save-btn" style="background:var(--bg-secondary);color:var(--text-primary);border:.5px solid var(--border-md);cursor:pointer">
+      ↑ Import JSON<input type="file" accept=".json" style="display:none" onchange="importConfigFromFile(this)">
+    </label>
+    <span class="inline-feedback" id="import-feedback" style="display:none">Config loaded!</span>
+  </div>
+  <div id="saved-list"></div>
+  <p class="saved-empty" id="saved-empty">No saved configurations yet. Adjust your settings and save one above.</p>
+</div>
+
+</div><!-- /page-wrap -->
+
+<script>
+const MONTHS_LBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+// Consistency bonus milestones in WEEKS. Compared against months*4.
+const BONUS_MILESTONES_WKS=[4,8,12];
+const ALL_TABS=['habits','challenges','learning','activities','redemption','global','config','saved'];
+const STORE_KEY='capwell_sim_configs_v1';
+const COL_HABITS='#D85A30',COL_CHALLENGES='#EF9F27',COL_ACTIONS='#378ADD',COL_LEARNING='#8B5CF6';
+
+let noGatekeepers=false, activeConfigName=null;
+let oneTimeActivities=[
+  {id:"a0",  label:"Complete your health survey",      pts:5000,checked:false,excluded:false,gatekeeper:true, gatekept:false},
+  {id:"a4",  label:"A1C Exam",                         pts:5000,checked:false,excluded:true, gatekeeper:false,gatekept:true},
+  {id:"a5",  label:"Annual Physical Exam",             pts:3000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a6",  label:"Biometric Screening",              pts:3000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a8",  label:"Colon Cancer Screening from Home", pts:5000,checked:false,excluded:true, gatekeeper:false,gatekept:true},
+  {id:"a20", label:"Get a breast cancer screening",    pts:5000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a111",label:"Quit Tobacco Coaching",            pts:5000,checked:false,excluded:true, gatekeeper:false,gatekept:true},
+  {id:"a200",label:"Dental Visit",                     pts:3000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a201",label:"Get a preventative screening",     pts:3000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a202",label:"Flu shot",                         pts:3000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a203",label:"Complete a 5K",                    pts:2000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a204",label:"Complete 3 challenges",            pts:1000,checked:false,excluded:false,gatekeeper:false,gatekept:true}
+];
+const gymChecked=Array(12).fill(false), stepsChecked=Array(12).fill(false);
+let thresholds=[{pts:7000,usd:25},{pts:14000,usd:50},{pts:21000,usd:75},{pts:28000,usd:100},{pts:35000,usd:150}];
+let nextId=210, currentRewardEarned=0;
+let segmentOrder=['habits','challenges','actions','learning'];
+const SEG_META={habits:{color:COL_HABITS,label:'Habits'},challenges:{color:COL_CHALLENGES,label:'Challenges'},actions:{color:COL_ACTIONS,label:'Healthy actions'},learning:{color:COL_LEARNING,label:'Learning tracks'}};
+
+/* ── helpers ── */
+function habitPtsEach(){const d=Math.max(0,Number(document.getElementById('cfg-habit-daily').value)||0);const w=Math.max(0,Number(document.getElementById('cfg-habit-weekly').value)||0);return(d*28)+(w*4);}
+function challengePtsEach(){const cp=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoint-pts').value)||0);const nc=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoints').value)||0);const comp=Math.max(0,Number(document.getElementById('cfg-challenge-completion-pts').value)||0);return(cp*nc)+comp;}
+function learningPtsEach(){const d=Math.max(0,Number(document.getElementById('cfg-learning-daily').value)||0);const c=Math.max(0,Number(document.getElementById('cfg-learning-completion').value)||0);return(d*10)+c;}
+function getWeeklyPts(){return Math.max(0,Number(document.getElementById('cfg-habit-weekly').value)||0);}
+function getMult(wks){return Math.max(0,Number(document.getElementById('cfg-mult-'+wks).value)||0);}
+function getBonusPts(wks){return Math.round(getWeeklyPts()*getMult(wks));}
+function fmtPts(n){return n.toLocaleString()+' pts';}
+function fmtUsd(n){return '$'+n.toLocaleString();}
+function cfgVal(id){return Math.max(1,Number(document.getElementById(id).value)||1);}
+function maxThresholdPts(){return thresholds.reduce((m,t)=>Math.max(m,t.pts),0);}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function calcRewardEarned(total){return thresholds.filter(t=>total>=t.pts).reduce((s,t)=>s+t.usd,0);}
+function calcMaxReward(){return thresholds.reduce((s,t)=>s+t.usd,0);}
+function gatekeepersActive(){return !noGatekeepers&&oneTimeActivities.some(a=>!a.excluded&&a.gatekeeper)&&oneTimeActivities.some(a=>!a.excluded&&a.gatekept);}
+function allGatekeepersDone(){return oneTimeActivities.filter(a=>!a.excluded&&a.gatekeeper).every(a=>a.checked);}
+
+function syncMonths(src){
+  const v=src==='m'?document.getElementById('sl-months').value:src==='c'?document.getElementById('sl-months-c').value:document.getElementById('sl-months-l').value;
+  document.getElementById('sl-months').value=v;
+  document.getElementById('sl-months-c').value=v;
+  document.getElementById('sl-months-l').value=v;
+}
+function toggleNoGatekeepers(){noGatekeepers=document.getElementById('cfg-no-gatekeepers').checked;renderCfgOneTime();renderSimOneTime();recalc();}
+function syncHabitMax(){const max=cfgVal('cfg-habit-max');const sl=document.getElementById('sl-habits');sl.max=max;if(Number(sl.value)>max)sl.value=max;recalc();}
+function syncChallengeMax(){const max=cfgVal('cfg-challenge-max');const sl=document.getElementById('sl-challenges');sl.max=max;if(Number(sl.value)>max)sl.value=max;recalc();}
+function syncLearningMax(){const max=cfgVal('cfg-learning-max');const sl=document.getElementById('sl-learning');sl.max=max;if(Number(sl.value)>max)sl.value=max;recalc();}
+function clampRedemption(){const el=document.getElementById('redemption-amt');let v=Math.max(0,Number(el.value)||0);if(v>currentRewardEarned){v=currentRewardEarned;el.value=v;}}
+
+function updateReadonlyBonuses(){
+  const w=getWeeklyPts();
+  BONUS_MILESTONES_WKS.forEach(wks=>{
+    const mult=getMult(wks),pts=Math.round(w*mult);
+    document.getElementById('ro-bonus-'+wks).textContent=fmtPts(pts);
+    document.getElementById('ro-formula-'+wks).textContent=w+' pts x '+mult+'x';
+  });
+}
+function updateChallengeDerivedNote(){const cp=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoint-pts').value)||0);const nc=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoints').value)||0);const comp=Math.max(0,Number(document.getElementById('cfg-challenge-completion-pts').value)||0);document.getElementById('challenge-derived-note').innerHTML='Max pts per challenge: <span>'+(cp*nc+comp).toLocaleString()+' pts</span> ('+cp+' x '+nc+' checkpoints + '+comp+' completion bonus)';}
+function updateLearningDerivedNote(){const d=Math.max(0,Number(document.getElementById('cfg-learning-daily').value)||0);const c=Math.max(0,Number(document.getElementById('cfg-learning-completion').value)||0);document.getElementById('learning-derived-note').innerHTML='Max pts per track: <span>'+((d*10)+c).toLocaleString()+' pts</span> ('+d+' pts/day x 10 days + '+c+' completion bonus)';}
+
+/* ── one-time activities ── */
+function addOneTime(){oneTimeActivities.push({id:'custom_'+(nextId++),label:'New action',pts:1000,checked:false,excluded:false,gatekeeper:false,gatekept:false});renderCfgOneTime();renderSimOneTime();recalc();}
+function removeOneTime(id){oneTimeActivities=oneTimeActivities.filter(a=>a.id!==id);renderCfgOneTime();renderSimOneTime();recalc();}
+function updateOneTimeLabel(id,val){const a=oneTimeActivities.find(x=>x.id===id);if(a){a.label=val;renderSimOneTime();}}
+function updateOneTimePts(id,val){const a=oneTimeActivities.find(x=>x.id===id);if(a){a.pts=Math.max(0,Number(val)||0);recalc();}}
+function toggleOneTime(id,val){const a=oneTimeActivities.find(x=>x.id===id);if(a){a.checked=val;recalc();}}
+function toggleExcluded(id,val){const a=oneTimeActivities.find(x=>x.id===id);if(a){a.excluded=val;renderCfgOneTime();renderSimOneTime();recalc();}}
+function toggleGatekeeper(id,val){const a=oneTimeActivities.find(x=>x.id===id);if(a){a.gatekeeper=val;if(val)a.gatekept=false;renderCfgOneTime();renderSimOneTime();recalc();}}
+function toggleGatekept(id,val){const a=oneTimeActivities.find(x=>x.id===id);if(a){a.gatekept=val;if(val)a.gatekeeper=false;renderCfgOneTime();renderSimOneTime();recalc();}}
+
+function renderCfgOneTime(){
+  const gd=noGatekeepers?' gating-disabled':'';
+  document.getElementById('cfg-onetime-list').innerHTML=oneTimeActivities.map(a=>{
+    const dim=a.excluded?'opacity:0.4;':'';
+    return '<div class="cfg-act-row" style="'+dim+'">'
+      +'<div class="cfg-act-top">'
+      +'<input class="cfg-act-name" type="text" value="'+escHtml(a.label)+'" onchange="updateOneTimeLabel(\''+a.id+'\',this.value)" oninput="updateOneTimeLabel(\''+a.id+'\',this.value)">'
+      +'<input class="cfg-act-pts" type="number" value="'+a.pts+'" min="0" step="100" onchange="updateOneTimePts(\''+a.id+'\',this.value)">'
+      +'<span style="font-size:12px;color:var(--text-tertiary)">pts</span>'
+      +'<button class="del-btn" onclick="removeOneTime(\''+a.id+'\')" title="Remove">×</button>'
+      +'</div>'
+      +'<div class="cfg-act-bottom">'
+      +'<div class="cfg-act-toggle"><input type="checkbox" id="ex-'+a.id+'" '+(a.excluded?'checked':'')+' onchange="toggleExcluded(\''+a.id+'\',this.checked)"><label for="ex-'+a.id+'" style="color:#e65100">Exclude</label></div>'
+      +'<div class="cfg-act-toggle'+gd+'"><input type="checkbox" id="gk-'+a.id+'" '+(a.gatekeeper?'checked':'')+' '+(noGatekeepers?'disabled':'')+' onchange="toggleGatekeeper(\''+a.id+'\',this.checked)"><label for="gk-'+a.id+'">Gatekeeper</label></div>'
+      +'<div class="cfg-act-toggle'+gd+'"><input type="checkbox" id="gkd-'+a.id+'" '+(a.gatekept?'checked':'')+' '+(noGatekeepers?'disabled':'')+' onchange="toggleGatekept(\''+a.id+'\',this.checked)"><label for="gkd-'+a.id+'">Gatekept</label></div>'
+      +'</div></div>';
+  }).join('');
+}
+function renderSimOneTime(){
+  const hasGate=gatekeepersActive();const unlocked=!hasGate||allGatekeepersDone();
+  const bar=document.getElementById('gate-status-bar');
+  if(!hasGate)bar.className='gate-status no-gate';
+  else if(unlocked){bar.className='gate-status unlocked';bar.textContent='Gatekeepers complete — all activities unlocked';}
+  else{const done=oneTimeActivities.filter(a=>a.gatekeeper&&a.checked).length;const tot=oneTimeActivities.filter(a=>a.gatekeeper).length;bar.className='gate-status locked';bar.textContent='Gatekept activities locked — complete gatekeepers first ('+done+'/'+tot+' done)';}
+  document.getElementById('onetime-list').innerHTML=oneTimeActivities.filter(a=>!a.excluded).map(a=>{
+    const ig=a.gatekept&&hasGate;const il=ig&&!unlocked;
+    const badge=(!noGatekeepers&&a.gatekeeper)?'<span class="badge-gatekeeper">gatekeeper</span>':(!noGatekeepers&&a.gatekept)?'<span class="badge-gatekept'+(il?' locked':'')+'">gatekept</span>':'';
+    return '<div class="sim-act-row"><input class="sim-act-check" type="checkbox" id="sim-act-'+a.id+'" '+(a.checked?'checked':'')+' onchange="toggleOneTime(\''+a.id+'\',this.checked)"><label for="sim-act-'+a.id+'" class="sim-act-label '+(il?'locked':'normal')+'">'+escHtml(a.label)+'</label>'+badge+'<span class="sim-act-pts '+(a.checked&&!il?'earned':il?'locked-pts':'')+'">'+(il?fmtPts(a.pts)+' (locked)':fmtPts(a.pts))+'</span></div>';
+  }).join('');
+}
+
+/* ── monthly grids ── */
+function renderMonthlyGrid(type,arr){document.getElementById(type+'-months').innerHTML=MONTHS_LBL.map((m,i)=>'<div class="month-box"><input type="checkbox" id="'+type+'-'+i+'" '+(arr[i]?'checked':'')+' onchange="toggleMonthly(\''+type+'\','+i+',this.checked)"><label for="'+type+'-'+i+'">'+m+'</label></div>').join('');}
+function toggleMonthly(type,idx,val){(type==='gym'?gymChecked:stepsChecked)[idx]=val;recalc();}
+function setAllMonthly(type,val){const a=type==='gym'?gymChecked:stepsChecked;a.fill(val);renderMonthlyGrid(type,a);recalc();}
+
+/* ── thresholds ── */
+function renderThresholds(){document.getElementById('threshold-list').innerHTML=thresholds.map((t,i)=>'<div class="threshold-row"><input type="number" value="'+t.pts+'" min="1" step="1000" onchange="updateThreshold('+i+',\'pts\',this.value)"><span class="arrow">pts →</span><input type="number" value="'+t.usd+'" min="1" step="10" onchange="updateThreshold('+i+',\'usd\',this.value)" style="width:64px"><span class="arrow">$</span><button class="del-btn" onclick="removeThreshold('+i+')" title="Remove">×</button></div>').join('');}
+function updateThreshold(i,k,v){thresholds[i][k]=Number(v);recalc();}
+function addThreshold(){thresholds.push({pts:10000,usd:100});thresholds.sort((a,b)=>a.pts-b.pts);renderThresholds();recalc();}
+function removeThreshold(i){thresholds.splice(i,1);renderThresholds();recalc();}
+
+/* ── streak / consistency bonus steps ── */
+function renderStreakSteps(months){
+  const weeksCompleted=months*4;
+  const nextWks=BONUS_MILESTONES_WKS.find(wks=>weeksCompleted<wks);
+  let earned=0,possible=0;
+  document.getElementById('streak-steps').innerHTML=BONUS_MILESTONES_WKS.map(wks=>{
+    const pts=getBonusPts(wks);
+    possible+=pts;
+    const reached=weeksCompleted>=wks;
+    const isNext=wks===nextWks;
+    if(reached)earned+=pts;
+    const cls=reached?'reached':(isNext?'next':'pending');
+    const weeksAway=wks-weeksCompleted;
+    const status=reached?'✓ earned':(isNext?weeksAway+' wks away':'');
+    return '<div class="streak-step '+cls+'">'
+      +'<div class="streak-week">'+wks+'-week bonus</div>'
+      +'<div class="streak-pts">+'+pts.toLocaleString()+' pts</div>'
+      +(status?'<div class="streak-status">'+status+'</div>':'')
+      +'</div>';
+  }).join('');
+  document.getElementById('streak-bonus-total').innerHTML=earned>0
+    ?'Consistency bonus earned: <span>'+fmtPts(earned)+'</span> of '+fmtPts(possible)+' possible'
+    :'No consistency bonuses earned yet — max possible: <span>'+fmtPts(possible)+'</span>';
+  return earned;
+}
+
+/* ── breakdown bar ── */
+function moveSegment(name,dir){
+  var i=segmentOrder.indexOf(name),j=i+dir;
+  if(j<0||j>=segmentOrder.length)return;
+  segmentOrder[i]=segmentOrder[j];segmentOrder[j]=name;
+  recalc();
+}
+function updateBreakdownBar(habitTotal,challengePts,actionPts,learningPts,dm){
+  var pts={habits:habitTotal,challenges:challengePts,actions:actionPts,learning:learningPts};
+  var total=habitTotal+challengePts+actionPts+learningPts;
+  var fillPct=Math.min(100,(total/dm)*100);
+  function seg(v){return total>0?((v/total)*fillPct).toFixed(2):'0';}
+  // width + CSS flex order so bar reflects user's chosen sequence
+  segmentOrder.forEach(function(name,i){
+    var el=document.getElementById('bseg-'+name);
+    el.style.width=seg(pts[name])+'%';
+    el.style.order=i;
+  });
+  // legend: ◀ ▶ buttons to shift position
+  var btnStyle='font-size:10px;padding:1px 5px;border:.5px solid var(--border-md);border-radius:4px;background:var(--bg-secondary);cursor:pointer;color:var(--text-secondary);line-height:1.4;font-family:inherit';
+  var spacer='<span style="display:inline-block;width:22px"></span>';
+  document.getElementById('breakdown-legend').innerHTML=segmentOrder.map(function(name,i){
+    var m=SEG_META[name];
+    var lBtn=i>0?'<button style="'+btnStyle+'" onclick="moveSegment(\''+name+'\',-1)">◀</button>':spacer;
+    var rBtn=i<segmentOrder.length-1?'<button style="'+btnStyle+'" onclick="moveSegment(\''+name+'\',1)">▶</button>':spacer;
+    return '<div class="legend-item">'+lBtn+'<span class="legend-dot" style="background:'+m.color+'"></span>'+m.label+': <span class="legend-pts">'+fmtPts(pts[name])+'</span>'+rBtn+'</div>';
+  }).join('');
+}
+
+/* ── main recalc ── */
+function recalc(){
+  updateReadonlyBonuses();updateChallengeDerivedNote();updateLearningDerivedNote();renderSimOneTime();
+
+  const months=Math.min(12,Math.max(0,Number(document.getElementById('sl-months').value)||0));
+  ['sl-months','sl-months-c','sl-months-l'].forEach(id=>document.getElementById(id).value=months);
+  ['out-months','out-months-c','out-months-l'].forEach(id=>document.getElementById(id).textContent=months);
+
+  /* habits */
+  const peh=habitPtsEach(),hmax=cfgVal('cfg-habit-max');
+  const hm=Number(document.getElementById('sl-habits').value);
+  const hp=Number(document.getElementById('sl-habit-pct').value)/100;
+  const d=Math.max(0,Number(document.getElementById('cfg-habit-daily').value)||0),w=getWeeklyPts();
+  document.getElementById('out-habits').textContent=hm;
+  document.getElementById('out-habit-pct').textContent=Math.round(hp*100)+'%';
+  document.getElementById('hint-habits').textContent='Max '+hmax+'/month — '+peh.toLocaleString()+' pts each at full completion ('+d+' pts/day x 28 + '+w+' pts/week x 4)';
+  const habitPts=Math.round(hm*peh*hp*months);
+  const streak=renderStreakSteps(months);
+  const habitTotal=habitPts+streak;
+  document.getElementById('habit-pts-total').textContent=fmtPts(habitTotal);
+
+  /* challenges */
+  const pec=challengePtsEach(),cmax=cfgVal('cfg-challenge-max');
+  const cm=Number(document.getElementById('sl-challenges').value);
+  const cp=Number(document.getElementById('sl-challenge-pct').value)/100;
+  document.getElementById('out-challenges').textContent=cm;
+  document.getElementById('out-challenge-pct').textContent=Math.round(cp*100)+'%';
+  document.getElementById('hint-challenges').textContent='Max '+cmax+'/month — '+pec.toLocaleString()+' pts each at full completion';
+  const challengePts=Math.round(cm*pec*cp*months);
+  document.getElementById('challenge-pts-total').textContent=fmtPts(challengePts);
+
+  /* learning tracks */
+  const pel=learningPtsEach(),lmax=cfgVal('cfg-learning-max');
+  const lm=Number(document.getElementById('sl-learning').value);
+  const lp=Number(document.getElementById('sl-learning-pct').value)/100;
+  document.getElementById('out-learning').textContent=lm;
+  document.getElementById('out-learning-pct').textContent=Math.round(lp*100)+'%';
+  document.getElementById('hint-learning').textContent='Max '+lmax+'/month — '+pel.toLocaleString()+' pts each at full completion';
+  const learningPts=Math.round(lm*pel*lp*months);
+  document.getElementById('learning-pts-total').textContent=fmtPts(learningPts);
+
+  /* healthy actions */
+  const gym1=Math.max(0,Number(document.getElementById('cfg-gym-pts').value)||0);
+  const step1=Math.max(0,Number(document.getElementById('cfg-steps-pts').value)||0);
+  const hasGate=gatekeepersActive(),unlocked=!hasGate||allGatekeepersDone();
+  let otp=0;oneTimeActivities.forEach(a=>{if(a.excluded||!a.checked)return;if(a.gatekept&&hasGate&&!unlocked)return;otp+=a.pts;});
+  const gymPts=gymChecked.filter(Boolean).length*gym1;
+  const stepPts=stepsChecked.filter(Boolean).length*step1;
+  const actionPts=otp+gymPts+stepPts;
+  document.getElementById('gym-pts-summary').textContent=gymChecked.filter(Boolean).length+' of 12 months — '+fmtPts(gymPts);
+  document.getElementById('steps-pts-summary').textContent=stepsChecked.filter(Boolean).length+' of 12 months — '+fmtPts(stepPts);
+
+  /* totals */
+  const total=habitTotal+challengePts+actionPts+learningPts;
+  const capPts=maxThresholdPts(),re=calcRewardEarned(total),mr=calcMaxReward();
+  currentRewardEarned=re;
+  const rel=document.getElementById('redemption-amt');
+  let red=Math.max(0,Number(rel.value)||0);if(red>re){red=re;rel.value=red;}
+  const bal=re-red;
+  document.getElementById('redemption-note').textContent=re>0?'Max redeemable: '+fmtUsd(re)+' — Balance after redemption: '+fmtUsd(bal):'No reward earned yet.';
+
+  const dm=Math.max(total,capPts)*1.05||1;
+  updateBreakdownBar(habitTotal,challengePts,actionPts,learningPts,dm);
+  document.getElementById('cap-line').style.left=((capPts/dm)*100).toFixed(1)+'%';
+  document.getElementById('cap-note').textContent=total>capPts?total.toLocaleString()+' pts earned — all thresholds crossed, max reward '+fmtUsd(mr):'';
+
+  document.getElementById('metrics').innerHTML=
+    '<div class="metric"><p class="metric-label">Total points</p><p class="metric-val">'+total.toLocaleString()+'</p><p class="metric-sub">max threshold: '+capPts.toLocaleString()+' pts</p></div>'+
+    '<div class="metric"><p class="metric-label">Reward earned</p><p class="metric-val">'+fmtUsd(re)+'</p><p class="metric-sub">max: '+fmtUsd(mr)+'</p></div>'+
+    '<div class="metric"><p class="metric-label">Reward balance</p><p class="metric-val-green">'+fmtUsd(bal)+'</p><p class="metric-sub">'+(red>0?fmtUsd(red)+' redeemed':'nothing redeemed')+'</p></div>';
+
+  const sorted=[...thresholds].sort((a,b)=>a.pts-b.pts);
+  document.getElementById('milestone-labels-above').innerHTML=sorted.map(t=>{const l=Math.min(97,(t.pts/dm)*100);return'<div class="milestone-label-above" style="left:'+l.toFixed(1)+'%"><span class="milestone-label-pts '+(total>=t.pts?'earned':'')+'">'+(t.pts.toLocaleString())+'</span></div>';}).join('');
+  document.getElementById('milestone-markers').innerHTML=sorted.map(t=>{const l=Math.min(97,(t.pts/dm)*100);return'<div class="milestone-tick" style="left:'+l.toFixed(1)+'%"><div class="milestone-line"></div><span class="milestone-lbl '+(total>=t.pts?'milestone-earned':'')+'">'+fmtUsd(t.usd)+'</span></div>';}).join('');
+  document.getElementById('badges').innerHTML=sorted.map(t=>{const e=total>=t.pts;return'<span class="reward-badge '+(e?'badge-earned':'badge-pending')+'">'+(e?'✓ ':'')+'+'+fmtUsd(t.usd)+' at '+t.pts.toLocaleString()+' pts</span>';}).join('');
+}
+
+/* ── navigation ── */
+function switchTab(name){
+  ALL_TABS.forEach(t=>{document.getElementById('tab-'+t).style.display=(t===name)?'':'none';});
+  document.querySelectorAll('.tab').forEach(btn=>{btn.classList.toggle('active',btn.getAttribute('onclick').includes("'"+name+"'"));});
+}
+function switchSubTab(name){
+  document.querySelectorAll('.sub-pane').forEach(p=>{p.classList.toggle('active',p.id===name);});
+  document.querySelectorAll('.sub-tab').forEach(b=>{b.classList.toggle('active',b.getAttribute('onclick').includes("'"+name+"'"));});
+}
+
+/* ── save / load / export / import ── */
+function getCurrentConfig(){
+  return {
+    global:{
+      mult4:document.getElementById('cfg-mult-4').value,
+      mult8:document.getElementById('cfg-mult-8').value,
+      mult12:document.getElementById('cfg-mult-12').value,
+      habitDaily:document.getElementById('cfg-habit-daily').value,
+      habitWeekly:document.getElementById('cfg-habit-weekly').value,
+      habitMax:document.getElementById('cfg-habit-max').value,
+      challengeCheckpointPts:document.getElementById('cfg-challenge-checkpoint-pts').value,
+      challengeCheckpoints:document.getElementById('cfg-challenge-checkpoints').value,
+      challengeCompletionPts:document.getElementById('cfg-challenge-completion-pts').value,
+      challengeMax:document.getElementById('cfg-challenge-max').value
+    },
+    learning:{daily:document.getElementById('cfg-learning-daily').value,completion:document.getElementById('cfg-learning-completion').value,max:document.getElementById('cfg-learning-max').value},
+    monthly:{gymPts:document.getElementById('cfg-gym-pts').value,stepsPts:document.getElementById('cfg-steps-pts').value},
+    thresholds:JSON.parse(JSON.stringify(thresholds)),
+    activities:oneTimeActivities.map(a=>({...a})),
+    noGatekeepers:noGatekeepers
+  };
+}
+function applyConfig(cfg){
+  const g=cfg.global||{};
+  if(g.mult4!=null)document.getElementById('cfg-mult-4').value=g.mult4;
+  if(g.mult8!=null)document.getElementById('cfg-mult-8').value=g.mult8;
+  if(g.mult12!=null)document.getElementById('cfg-mult-12').value=g.mult12;
+  if(g.habitDaily!=null)document.getElementById('cfg-habit-daily').value=g.habitDaily;
+  if(g.habitWeekly!=null)document.getElementById('cfg-habit-weekly').value=g.habitWeekly;
+  if(g.habitMax!=null)document.getElementById('cfg-habit-max').value=g.habitMax;
+  if(g.challengeCheckpointPts!=null)document.getElementById('cfg-challenge-checkpoint-pts').value=g.challengeCheckpointPts;
+  if(g.challengeCheckpoints!=null)document.getElementById('cfg-challenge-checkpoints').value=g.challengeCheckpoints;
+  if(g.challengeCompletionPts!=null)document.getElementById('cfg-challenge-completion-pts').value=g.challengeCompletionPts;
+  if(g.challengeMax!=null)document.getElementById('cfg-challenge-max').value=g.challengeMax;
+  const l=cfg.learning||{};
+  if(l.daily!=null)document.getElementById('cfg-learning-daily').value=l.daily;
+  if(l.completion!=null)document.getElementById('cfg-learning-completion').value=l.completion;
+  if(l.max!=null)document.getElementById('cfg-learning-max').value=l.max;
+  const m=cfg.monthly||{};
+  if(m.gymPts!=null)document.getElementById('cfg-gym-pts').value=m.gymPts;
+  if(m.stepsPts!=null)document.getElementById('cfg-steps-pts').value=m.stepsPts;
+  if(cfg.thresholds){thresholds=JSON.parse(JSON.stringify(cfg.thresholds));renderThresholds();}
+  if(cfg.activities){oneTimeActivities=cfg.activities.map(a=>({...a}));}
+  noGatekeepers=cfg.noGatekeepers||false;
+  document.getElementById('cfg-no-gatekeepers').checked=noGatekeepers;
+  syncHabitMax();syncChallengeMax();syncLearningMax();
+  renderCfgOneTime();renderSimOneTime();recalc();
+}
+function setActiveCfgBadge(name){
+  activeConfigName=name;
+  const b=document.getElementById('active-cfg-badge');
+  if(name){b.textContent=name;b.style.display='';}else{b.style.display='none';}
+}
+function flashFeedback(elId,msg,ms){
+  const el=document.getElementById(elId);if(!el)return;
+  el.textContent=msg;el.style.display='';
+  setTimeout(function(){el.style.display='none';},ms||1600);
+}
+function saveCurrentConfig(){
+  const nameEl=document.getElementById('save-name');
+  const name=nameEl.value.trim();
+  if(!name){nameEl.style.borderColor='#e65100';nameEl.focus();setTimeout(function(){nameEl.style.borderColor='';},1200);return;}
+  const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
+  const cfg=getCurrentConfig();
+  cfg.name=name;cfg.id=Date.now();
+  cfg.savedAt=new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+  saved.unshift(cfg);
+  localStorage.setItem(STORE_KEY,JSON.stringify(saved));
+  nameEl.value='';setActiveCfgBadge(name);renderSavedConfigs();
+  flashFeedback('save-feedback','Config saved!',1800);
+}
+function loadSavedConfig(id){
+  const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
+  const cfg=saved.find(function(c){return c.id===id;});
+  if(!cfg)return;applyConfig(cfg);setActiveCfgBadge(cfg.name);renderSavedConfigs();
+}
+function deleteSavedConfig(id){
+  let saved=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
+  const cfg=saved.find(function(c){return c.id===id;});
+  saved=saved.filter(function(c){return c.id!==id;});
+  localStorage.setItem(STORE_KEY,JSON.stringify(saved));
+  if(cfg&&cfg.name===activeConfigName)setActiveCfgBadge(null);
+  renderSavedConfigs();
+}
+function exportConfig(cfg){
+  const name=(cfg.name||'capwell-config').replace(/[^a-z0-9]/gi,'-').toLowerCase();
+  const blob=new Blob([JSON.stringify(cfg,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=name+'.json';a.click();URL.revokeObjectURL(url);
+}
+function exportCurrentConfig(){
+  const cfg=getCurrentConfig();
+  cfg.name=document.getElementById('save-name').value.trim()||'capwell-config';
+  exportConfig(cfg);
+}
+function exportSavedConfig(id){
+  const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
+  const cfg=saved.find(function(c){return c.id===id;});
+  if(cfg)exportConfig(cfg);
+}
+function importConfigFromFile(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const cfg=JSON.parse(e.target.result);
+      if(!cfg||typeof cfg!=='object')throw new Error('bad');
+      applyConfig(cfg);
+      if(cfg.name)setActiveCfgBadge(cfg.name);
+      flashFeedback('import-feedback','Config loaded!',2500);
+    }catch(err){alert('Could not read config file — make sure it\'s a valid CapWell config JSON.');}
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+function renderSavedConfigs(){
+  const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
+  const list=document.getElementById('saved-list');const empty=document.getElementById('saved-empty');
+  if(!list)return;
+  if(saved.length===0){list.innerHTML='';if(empty)empty.style.display='';return;}
+  if(empty)empty.style.display='none';
+  list.innerHTML=saved.map(function(c){
+    const isActive=activeConfigName&&c.name===activeConfigName;
+    return '<div class="saved-item'+(isActive?' is-active':'')+'">'
+      +'<div class="saved-item-info"><div class="saved-item-name">'+escHtml(c.name)+(isActive?' <span style="font-size:10px;color:var(--green-text);font-weight:400">(active)</span>':'')+'</div>'
+      +'<div class="saved-item-meta">Saved '+escHtml(c.savedAt)+'</div></div>'
+      +'<button class="load-btn" style="color:var(--text-secondary);border-color:var(--border-md)" onclick="exportSavedConfig('+c.id+')" title="Download as JSON">↓ Export</button>'
+      +'<button class="load-btn" onclick="loadSavedConfig('+c.id+')">Load</button>'
+      +'<button class="del-btn" onclick="deleteSavedConfig('+c.id+')" title="Delete">×</button>'
+      +'</div>';
+  }).join('');
+}
+
+/* ── init ── */
+renderCfgOneTime();
+renderSimOneTime();
+renderMonthlyGrid('gym',gymChecked);
+renderMonthlyGrid('steps',stepsChecked);
+renderThresholds();
+renderSavedConfigs();
+recalc();
+</script>
+</body>
+</html>
