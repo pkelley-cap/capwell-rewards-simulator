@@ -1,17 +1,17 @@
 # CapWell Rewards Simulator
 
-A single-file browser tool for modeling annual points and reward earnings in a healthcare wellness program. No install, no server, no dependencies — open `index.html` in any browser.
+A single-file browser tool for modeling annual pebbles and reward earnings in a healthcare wellness program. No install, no server, no dependencies — open `index.html` in any browser.
 
 ## What it does
 
-Simulates how a member accumulates points across four earn types, then maps those points to dollar rewards:
+Simulates how a member accumulates pebbles across four earn types, then maps those pebbles to dollar rewards:
 
-| Earn type | How points accrue |
+| Earn type | How pebbles accrue |
 |---|---|
 | **Habits** | Daily check-ins + weekly goals, plus 4/8/12-week consistency bonuses |
-| **Challenges** | Per-checkpoint points + a completion bonus |
-| **Learning tracks** | Daily completion points over a 10-day track + a completion bonus |
-| **Healthy actions** | One-time actions (screenings, exams) + monthly gym and step goals |
+| **Challenges** | Per-checkpoint pebbles + a completion bonus |
+| **Learning tracks** | Daily completion pebbles over a 10-day track + a completion bonus |
+| **Healthy actions** | One-time actions (screenings, exams) |
 
 Reward thresholds pay out independently as they're crossed, so total reward is the sum of every threshold reached.
 
@@ -19,9 +19,9 @@ Reward thresholds pay out independently as they're crossed, so total reward is t
 
 **Simulate** tabs drive the member-side inputs — months active, activities per month, average completion rate. The summary bar at the top updates live and breaks earnings down by color. Use the ◀ ▶ arrows in the legend to reorder segments.
 
-**Global config** holds the program-wide rules: habit and challenge point values, consistency bonus multipliers, learning track values, and per-month limits.
+**Global config** holds the program-wide rules: habit and challenge pebble values, consistency bonus multipliers, learning track values, and per-month limits.
 
-**Client config** holds the per-client settings that vary between employers: monthly goal values, the healthy actions list, and reward thresholds.
+**Client config** holds the per-client settings that vary between employers: the healthy actions list and reward thresholds.
 
 ### Gatekeeper logic
 
@@ -33,4 +33,4 @@ Saved configs live in your browser's local storage, so they don't travel between
 
 ## Editing
 
-Everything is in one file — HTML, CSS, and JavaScript. Open it in any text editor to change defaults. The starting values for activities, thresholds, and point rules are declared as plain JavaScript objects near the top of the `<script>` block.
+Everything is in one file — HTML, CSS, and JavaScript. Open it in any text editor to change defaults. The starting values for activities, thresholds, and pebble rules are declared as plain JavaScript objects near the top of the `<script>` block.
