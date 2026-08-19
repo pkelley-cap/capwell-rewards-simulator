@@ -55,16 +55,6 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .tab{padding:6px 14px;border-radius:var(--radius-md);border:.5px solid var(--border-md);font-size:13px;cursor:pointer;background:transparent;color:var(--text-secondary);font-family:inherit}
 .tab:hover{background:var(--bg-secondary)}
 .tab.active{background:var(--bg-secondary);color:var(--text-primary);font-weight:500;border-color:var(--border-strong)}
-.month-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:8px 0 4px}
-.month-box{display:flex;flex-direction:column;align-items:center;gap:4px}
-.month-box input{accent-color:var(--green);width:15px;height:15px;cursor:pointer}
-.month-box label{font-size:11px;color:var(--text-tertiary);cursor:pointer}
-.monthly-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.monthly-pts{font-size:12px;color:var(--text-tertiary)}
-.select-links{display:flex;gap:8px}
-.sel-link{font-size:11px;color:var(--green);background:none;border:none;cursor:pointer;padding:0;font-family:inherit}
-.sel-link:hover{text-decoration:underline}
-.monthly-section{border-top:.5px solid var(--border);padding-top:12px;margin-top:12px}
 .config-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .config-row label{font-size:12px;color:var(--text-secondary);min-width:200px}
 .config-row input[type=number]{width:80px}
@@ -78,9 +68,6 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .del-btn:hover{color:var(--text-primary)}
 .cap-note{font-size:11px;color:var(--text-tertiary);margin:2px 0 8px}
 .hint{font-size:12px;color:var(--text-tertiary);margin-top:6px}
-.monthly-cfg-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.monthly-cfg-row label{font-size:13px;color:var(--text-secondary);flex:1}
-.monthly-cfg-row input[type=number]{width:80px}
 .card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
 .card-pts-summary{text-align:right}
 .card-pts-label{font-size:11px;color:var(--text-tertiary);margin:0 0 2px}
@@ -160,14 +147,14 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .load-btn:hover{background:var(--green-light)}
 .saved-empty{font-size:13px;color:var(--text-tertiary);text-align:center;padding:28px 0 8px}
 .inline-feedback{font-size:12px;color:var(--green);font-weight:500;min-width:60px}
-@media(max-width:520px){.metric-grid{grid-template-columns:repeat(2,1fr)}.month-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.row-label{min-width:120px}.streak-steps{grid-template-columns:repeat(3,1fr)}.tab-group-label{min-width:44px;font-size:9px}.save-input-row{flex-wrap:wrap}.breakdown-legend{gap:10px}}
+@media(max-width:520px){.metric-grid{grid-template-columns:repeat(2,1fr)}.row-label{min-width:120px}.streak-steps{grid-template-columns:repeat(3,1fr)}.tab-group-label{min-width:44px;font-size:9px}.save-input-row{flex-wrap:wrap}.breakdown-legend{gap:10px}}
 </style>
 </head>
 <body>
 <div class="page-wrap">
 <div class="page-header">
   <h1>Healthcare rewards simulator</h1>
-  <p>Model annual points and reward earnings across habits, challenges, healthy actions, and learning tracks.</p>
+  <p>Model annual pebbles and reward earnings across habits, challenges, healthy actions, and learning tracks.</p>
 </div>
 
 <!-- EARNINGS BOX -->
@@ -191,10 +178,10 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
     <div class="milestone-markers" id="milestone-markers"></div>
   </div>
   <div class="breakdown-legend" id="breakdown-legend">
-    <div class="legend-item"><span class="legend-dot" style="background:#D85A30"></span>Habits: <span class="legend-pts">0 pts</span></div>
-    <div class="legend-item"><span class="legend-dot" style="background:#EF9F27"></span>Challenges: <span class="legend-pts">0 pts</span></div>
-    <div class="legend-item"><span class="legend-dot" style="background:#378ADD"></span>Healthy actions: <span class="legend-pts">0 pts</span></div>
-    <div class="legend-item"><span class="legend-dot" style="background:#8B5CF6"></span>Learning tracks: <span class="legend-pts">0 pts</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#D85A30"></span>Habits: <span class="legend-pts">0 pebbles</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#EF9F27"></span>Challenges: <span class="legend-pts">0 pebbles</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#378ADD"></span>Healthy actions: <span class="legend-pts">0 pebbles</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#8B5CF6"></span>Learning tracks: <span class="legend-pts">0 pebbles</span></div>
   </div>
   <div class="cap-note" id="cap-note"></div>
   <div id="badges" style="margin-bottom:4px"></div>
@@ -222,7 +209,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 <div id="tab-habits" class="card">
   <div class="card-header">
     <p class="section-label" style="margin:0">Habits</p>
-    <div class="card-pts-summary"><p class="card-pts-label">Total points earned from habits this year</p><p class="card-pts-val" id="habit-pts-total">0 pts</p></div>
+    <div class="card-pts-summary"><p class="card-pts-label">Total pebbles earned from habits this year</p><p class="card-pts-val" id="habit-pts-total">0 pebbles</p></div>
   </div>
   <div class="row"><span class="row-label">Months completed</span><input type="range" min="0" max="12" step="1" id="sl-months" value="0" oninput="syncMonths('m');recalc()"><span class="row-val" id="out-months">0</span></div>
   <div class="row"><span class="row-label">Habits completed / month</span><input type="range" min="0" max="5" step="1" id="sl-habits" value="0" oninput="recalc()"><span class="row-val" id="out-habits">0</span></div>
@@ -239,7 +226,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 <div id="tab-challenges" class="card" style="display:none">
   <div class="card-header">
     <p class="section-label" style="margin:0">Challenges</p>
-    <div class="card-pts-summary"><p class="card-pts-label">Total points earned from challenges this year</p><p class="card-pts-val" id="challenge-pts-total">0 pts</p></div>
+    <div class="card-pts-summary"><p class="card-pts-label">Total pebbles earned from challenges this year</p><p class="card-pts-val" id="challenge-pts-total">0 pebbles</p></div>
   </div>
   <div class="row"><span class="row-label">Months completed</span><input type="range" min="0" max="12" step="1" id="sl-months-c" value="0" oninput="syncMonths('c');recalc()"><span class="row-val" id="out-months-c">0</span></div>
   <div class="row"><span class="row-label">Challenges completed / month</span><input type="range" min="0" max="4" step="1" id="sl-challenges" value="0" oninput="recalc()"><span class="row-val" id="out-challenges">0</span></div>
@@ -251,7 +238,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 <div id="tab-learning" class="card" style="display:none">
   <div class="card-header">
     <p class="section-label" style="margin:0">Learning tracks</p>
-    <div class="card-pts-summary"><p class="card-pts-label">Total points earned from learning tracks this year</p><p class="card-pts-val" id="learning-pts-total">0 pts</p></div>
+    <div class="card-pts-summary"><p class="card-pts-label">Total pebbles earned from learning tracks this year</p><p class="card-pts-val" id="learning-pts-total">0 pebbles</p></div>
   </div>
   <div class="row"><span class="row-label">Months completed</span><input type="range" min="0" max="12" step="1" id="sl-months-l" value="0" oninput="syncMonths('l');recalc()"><span class="row-val" id="out-months-l">0</span></div>
   <div class="row"><span class="row-label">Learning tracks / month</span><input type="range" min="0" max="4" step="1" id="sl-learning" value="0" oninput="recalc()"><span class="row-val" id="out-learning">0</span></div>
@@ -264,16 +251,6 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
   <div id="gate-status-bar" class="gate-status no-gate"></div>
   <p class="section-label">One-time actions</p>
   <div id="onetime-list"></div>
-  <div class="monthly-section">
-    <p class="section-label" style="margin-bottom:12px">Monthly goals — gym check-in</p>
-    <div class="monthly-header"><span class="monthly-pts" id="gym-pts-summary"></span><div class="select-links"><button class="sel-link" onclick="setAllMonthly('gym',true)">all</button><button class="sel-link" onclick="setAllMonthly('gym',false)">none</button></div></div>
-    <div class="month-grid" id="gym-months"></div>
-  </div>
-  <div class="monthly-section">
-    <p class="section-label" style="margin-bottom:12px">Monthly goals — step goal</p>
-    <div class="monthly-header"><span class="monthly-pts" id="steps-pts-summary"></span><div class="select-links"><button class="sel-link" onclick="setAllMonthly('steps',true)">all</button><button class="sel-link" onclick="setAllMonthly('steps',false)">none</button></div></div>
-    <div class="month-grid" id="steps-months"></div>
-  </div>
 </div>
 
 <!-- REDEMPTION TAB -->
@@ -286,27 +263,27 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 <!-- GLOBAL CONFIG TAB -->
 <div id="tab-global" class="card" style="display:none">
   <p class="section-label">Consistency bonus multipliers</p>
-  <p style="font-size:12px;color:var(--text-tertiary);margin:0 0 14px">Applied to points per weekly goal met to derive each consistency bonus amount.</p>
+  <p style="font-size:12px;color:var(--text-tertiary);margin:0 0 14px">Applied to pebbles per weekly goal met to derive each consistency bonus amount.</p>
   <div class="config-row"><label>4-week multiplier</label><input type="number" id="cfg-mult-4" min="0" step="0.5" value="2" oninput="recalc()"><span class="unit">x</span></div>
   <div class="config-row"><label>8-week multiplier</label><input type="number" id="cfg-mult-8" min="0" step="0.5" value="4" oninput="recalc()"><span class="unit">x</span></div>
-  <div class="config-row" style="margin-bottom:0"><label>12-week multiplier</label><input type="number" id="cfg-mult-12" min="0" step="0.5" value="6" oninput="recalc()"><span class="unit">x</span></div>
+  <div class="config-row" style="margin-bottom:0"><label>12-week multiplier</label><input type="number" id="cfg-mult-12" min="0" step="0.5" value="8" oninput="recalc()"><span class="unit">x</span></div>
 
   <hr class="divider">
   <p class="section-label">Habits</p>
-  <div class="config-row"><label>Points per daily check-in</label><input type="number" id="cfg-habit-daily" min="0" step="1" value="5" oninput="recalc()"><span class="unit">pts</span></div>
-  <div class="config-row"><label>Points per weekly goal met</label><input type="number" id="cfg-habit-weekly" min="0" step="5" value="50" oninput="recalc()"><span class="unit">pts</span></div>
+  <div class="config-row"><label>Pebbles per daily check-in</label><input type="number" id="cfg-habit-daily" min="0" step="1" value="5" oninput="recalc()"><span class="unit">pebbles</span></div>
+  <div class="config-row"><label>Pebbles per weekly goal met</label><input type="number" id="cfg-habit-weekly" min="0" step="5" value="20" oninput="recalc()"><span class="unit">pebbles</span></div>
   <hr class="divider">
   <p class="section-label">Consistency bonuses</p>
-  <p style="font-size:12px;color:var(--text-tertiary);margin:0 0 12px">Derived from points per weekly goal met × multiplier.</p>
+  <p style="font-size:12px;color:var(--text-tertiary);margin:0 0 12px">Derived from pebbles per weekly goal met × multiplier.</p>
   <div class="readonly-row"><label>4-week bonus</label><span class="readonly-val" id="ro-bonus-4">--</span><span class="readonly-formula" id="ro-formula-4"></span></div>
   <div class="readonly-row"><label>8-week bonus</label><span class="readonly-val" id="ro-bonus-8">--</span><span class="readonly-formula" id="ro-formula-8"></span></div>
   <div class="readonly-row"><label>12-week bonus</label><span class="readonly-val" id="ro-bonus-12">--</span><span class="readonly-formula" id="ro-formula-12"></span></div>
 
   <hr class="divider">
   <p class="section-label">Challenges</p>
-  <div class="config-row"><label>Points per checkpoint</label><input type="number" id="cfg-challenge-checkpoint-pts" min="0" step="5" value="25" oninput="recalc()"><span class="unit">pts</span></div>
+  <div class="config-row"><label>Pebbles per checkpoint</label><input type="number" id="cfg-challenge-checkpoint-pts" min="0" step="5" value="25" oninput="recalc()"><span class="unit">pebbles</span></div>
   <div class="config-row"><label>Number of checkpoints</label><input type="number" id="cfg-challenge-checkpoints" min="0" step="1" value="4" oninput="recalc()"></div>
-  <div class="config-row" style="margin-bottom:4px"><label>Points per challenge completion</label><input type="number" id="cfg-challenge-completion-pts" min="0" step="25" value="150" oninput="recalc()"><span class="unit">pts</span></div>
+  <div class="config-row" style="margin-bottom:4px"><label>Pebbles per challenge completion</label><input type="number" id="cfg-challenge-completion-pts" min="0" step="25" value="150" oninput="recalc()"><span class="unit">pebbles</span></div>
   <div class="derived-note" id="challenge-derived-note"></div>
 
   <hr class="divider">
@@ -316,8 +293,8 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 
   <hr class="divider">
   <p class="section-label">Learning tracks</p>
-  <div class="config-row"><label>Points per daily completion</label><input type="number" id="cfg-learning-daily" min="0" step="1" value="10" oninput="recalc()"><span class="unit">pts</span></div>
-  <div class="config-row" style="margin-bottom:4px"><label>Points per track completion</label><input type="number" id="cfg-learning-completion" min="0" step="10" value="100" oninput="recalc()"><span class="unit">pts</span></div>
+  <div class="config-row"><label>Pebbles per daily completion</label><input type="number" id="cfg-learning-daily" min="0" step="1" value="10" oninput="recalc()"><span class="unit">pebbles</span></div>
+  <div class="config-row" style="margin-bottom:4px"><label>Pebbles per track completion</label><input type="number" id="cfg-learning-completion" min="0" step="10" value="100" oninput="recalc()"><span class="unit">pebbles</span></div>
   <div class="derived-note" id="learning-derived-note"></div>
   <div class="config-row" style="margin-bottom:0"><label>Max learning tracks per month</label><input type="number" id="cfg-learning-max" min="1" step="1" value="4" oninput="syncLearningMax()"></div>
 </div>
@@ -325,20 +302,12 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 <!-- CLIENT CONFIG TAB -->
 <div id="tab-config" class="card" style="display:none">
   <div class="sub-tab-row">
-    <button class="sub-tab active" onclick="switchSubTab('cc-monthly')">Monthly goals</button>
-    <button class="sub-tab" onclick="switchSubTab('cc-actions')">Healthy actions</button>
+    <button class="sub-tab active" onclick="switchSubTab('cc-actions')">Healthy actions</button>
     <button class="sub-tab" onclick="switchSubTab('cc-thresholds')">Reward thresholds</button>
   </div>
 
-  <!-- Monthly Goals -->
-  <div id="cc-monthly" class="sub-pane active">
-    <p class="section-label">Monthly goals</p>
-    <div class="monthly-cfg-row"><label>Pts per gym check-in month</label><input type="number" id="cfg-gym-pts" min="0" step="100" value="1000" oninput="recalc()"><span class="unit">pts</span></div>
-    <div class="monthly-cfg-row" style="margin-top:8px"><label>Pts per step goal month</label><input type="number" id="cfg-steps-pts" min="0" step="100" value="1000" oninput="recalc()"><span class="unit">pts</span></div>
-  </div>
-
   <!-- Healthy Actions -->
-  <div id="cc-actions" class="sub-pane">
+  <div id="cc-actions" class="sub-pane active">
     <p class="section-label">Healthy actions</p>
     <div class="gate-toggle-row">
       <input type="checkbox" id="cfg-no-gatekeepers" onchange="toggleNoGatekeepers()">
@@ -363,7 +332,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
     <p class="section-label" style="margin:0">Saved configurations</p>
   </div>
   <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:14px;margin-bottom:12px">
-    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Name and save a snapshot of all current configuration settings — multipliers, points, thresholds, and healthy actions.</p>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Name and save a snapshot of all current configuration settings — multipliers, pebbles, thresholds, and healthy actions.</p>
     <div class="save-input-row">
       <input type="text" id="save-name" placeholder="e.g. Acme Corp — Standard plan" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
       <button class="save-btn" onclick="saveCurrentConfig()">Save config</button>
@@ -385,7 +354,6 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 </div><!-- /page-wrap -->
 
 <script>
-const MONTHS_LBL=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 // Consistency bonus milestones in WEEKS. Compared against months*4.
 const BONUS_MILESTONES_WKS=[4,8,12];
 const ALL_TABS=['habits','challenges','learning','activities','redemption','global','config','saved'];
@@ -394,21 +362,21 @@ const COL_HABITS='#D85A30',COL_CHALLENGES='#EF9F27',COL_ACTIONS='#378ADD',COL_LE
 
 let noGatekeepers=false, activeConfigName=null;
 let oneTimeActivities=[
-  {id:"a0",  label:"Complete your health survey",      pts:5000,checked:false,excluded:false,gatekeeper:true, gatekept:false},
-  {id:"a4",  label:"A1C Exam",                         pts:5000,checked:false,excluded:true, gatekeeper:false,gatekept:true},
-  {id:"a5",  label:"Annual Physical Exam",             pts:3000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
-  {id:"a6",  label:"Biometric Screening",              pts:3000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
-  {id:"a8",  label:"Colon Cancer Screening from Home", pts:5000,checked:false,excluded:true, gatekeeper:false,gatekept:true},
-  {id:"a20", label:"Get a breast cancer screening",    pts:5000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
-  {id:"a111",label:"Quit Tobacco Coaching",            pts:5000,checked:false,excluded:true, gatekeeper:false,gatekept:true},
-  {id:"a200",label:"Dental Visit",                     pts:3000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
-  {id:"a201",label:"Get a preventative screening",     pts:3000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
-  {id:"a202",label:"Flu shot",                         pts:3000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
-  {id:"a203",label:"Complete a 5K",                    pts:2000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
-  {id:"a204",label:"Complete 3 challenges",            pts:1000,checked:false,excluded:false,gatekeeper:false,gatekept:true}
+  {id:"a0",  label:"Complete your health survey",                          pts:3000,checked:false,excluded:false,gatekeeper:true, gatekept:false},
+  {id:"a4",  label:"A1C Exam",                                             pts:5000,checked:false,excluded:true, gatekeeper:false,gatekept:true},
+  {id:"a5",  label:"Annual Physical Exam",                                 pts:2000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a6",  label:"Biometric Screening",                                  pts:2000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a8",  label:"Colon Cancer Screening from Home",                     pts:5000,checked:false,excluded:true, gatekeeper:false,gatekept:true},
+  {id:"a20", label:"Get a breast cancer screening (only for women > 40)",  pts:2000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a111",label:"Quit Tobacco Coaching",                                pts:5000,checked:false,excluded:true, gatekeeper:false,gatekept:true},
+  {id:"a200",label:"Dental Visit",                                         pts:2200,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a201",label:"Get a preventative screening",                         pts:2000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a202",label:"Flu shot",                                             pts:1500,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a203",label:"Complete a 5K",                                        pts:1000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a204",label:"Complete 3 challenges",                                pts:1000,checked:false,excluded:false,gatekeeper:false,gatekept:true},
+  {id:"a205",label:"Complete a life beyond numbers event",                 pts:1000,checked:false,excluded:false,gatekeeper:false,gatekept:true}
 ];
-const gymChecked=Array(12).fill(false), stepsChecked=Array(12).fill(false);
-let thresholds=[{pts:7000,usd:25},{pts:14000,usd:50},{pts:21000,usd:75},{pts:28000,usd:100},{pts:35000,usd:150}];
+let thresholds=[{pts:3000,usd:50},{pts:6000,usd:50},{pts:9000,usd:50},{pts:12000,usd:50}];
 let nextId=210, currentRewardEarned=0;
 let segmentOrder=['habits','challenges','actions','learning'];
 const SEG_META={habits:{color:COL_HABITS,label:'Habits'},challenges:{color:COL_CHALLENGES,label:'Challenges'},actions:{color:COL_ACTIONS,label:'Healthy actions'},learning:{color:COL_LEARNING,label:'Learning tracks'}};
@@ -420,7 +388,7 @@ function learningPtsEach(){const d=Math.max(0,Number(document.getElementById('cf
 function getWeeklyPts(){return Math.max(0,Number(document.getElementById('cfg-habit-weekly').value)||0);}
 function getMult(wks){return Math.max(0,Number(document.getElementById('cfg-mult-'+wks).value)||0);}
 function getBonusPts(wks){return Math.round(getWeeklyPts()*getMult(wks));}
-function fmtPts(n){return n.toLocaleString()+' pts';}
+function fmtPts(n){return n.toLocaleString()+' pebbles';}
 function fmtUsd(n){return '$'+n.toLocaleString();}
 function cfgVal(id){return Math.max(1,Number(document.getElementById(id).value)||1);}
 function maxThresholdPts(){return thresholds.reduce((m,t)=>Math.max(m,t.pts),0);}
@@ -447,11 +415,11 @@ function updateReadonlyBonuses(){
   BONUS_MILESTONES_WKS.forEach(wks=>{
     const mult=getMult(wks),pts=Math.round(w*mult);
     document.getElementById('ro-bonus-'+wks).textContent=fmtPts(pts);
-    document.getElementById('ro-formula-'+wks).textContent=w+' pts x '+mult+'x';
+    document.getElementById('ro-formula-'+wks).textContent=w+' pebbles x '+mult+'x';
   });
 }
-function updateChallengeDerivedNote(){const cp=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoint-pts').value)||0);const nc=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoints').value)||0);const comp=Math.max(0,Number(document.getElementById('cfg-challenge-completion-pts').value)||0);document.getElementById('challenge-derived-note').innerHTML='Max pts per challenge: <span>'+(cp*nc+comp).toLocaleString()+' pts</span> ('+cp+' x '+nc+' checkpoints + '+comp+' completion bonus)';}
-function updateLearningDerivedNote(){const d=Math.max(0,Number(document.getElementById('cfg-learning-daily').value)||0);const c=Math.max(0,Number(document.getElementById('cfg-learning-completion').value)||0);document.getElementById('learning-derived-note').innerHTML='Max pts per track: <span>'+((d*10)+c).toLocaleString()+' pts</span> ('+d+' pts/day x 10 days + '+c+' completion bonus)';}
+function updateChallengeDerivedNote(){const cp=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoint-pts').value)||0);const nc=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoints').value)||0);const comp=Math.max(0,Number(document.getElementById('cfg-challenge-completion-pts').value)||0);document.getElementById('challenge-derived-note').innerHTML='Max pebbles per challenge: <span>'+(cp*nc+comp).toLocaleString()+' pebbles</span> ('+cp+' x '+nc+' checkpoints + '+comp+' completion bonus)';}
+function updateLearningDerivedNote(){const d=Math.max(0,Number(document.getElementById('cfg-learning-daily').value)||0);const c=Math.max(0,Number(document.getElementById('cfg-learning-completion').value)||0);document.getElementById('learning-derived-note').innerHTML='Max pebbles per track: <span>'+((d*10)+c).toLocaleString()+' pebbles</span> ('+d+' pebbles/day x 10 days + '+c+' completion bonus)';}
 
 /* ── one-time activities ── */
 function addOneTime(){oneTimeActivities.push({id:'custom_'+(nextId++),label:'New action',pts:1000,checked:false,excluded:false,gatekeeper:false,gatekept:false});renderCfgOneTime();renderSimOneTime();recalc();}
@@ -471,7 +439,7 @@ function renderCfgOneTime(){
       +'<div class="cfg-act-top">'
       +'<input class="cfg-act-name" type="text" value="'+escHtml(a.label)+'" onchange="updateOneTimeLabel(\''+a.id+'\',this.value)" oninput="updateOneTimeLabel(\''+a.id+'\',this.value)">'
       +'<input class="cfg-act-pts" type="number" value="'+a.pts+'" min="0" step="100" onchange="updateOneTimePts(\''+a.id+'\',this.value)">'
-      +'<span style="font-size:12px;color:var(--text-tertiary)">pts</span>'
+      +'<span style="font-size:12px;color:var(--text-tertiary)">pebbles</span>'
       +'<button class="del-btn" onclick="removeOneTime(\''+a.id+'\')" title="Remove">×</button>'
       +'</div>'
       +'<div class="cfg-act-bottom">'
@@ -494,20 +462,18 @@ function renderSimOneTime(){
   }).join('');
 }
 
-/* ── monthly grids ── */
-function renderMonthlyGrid(type,arr){document.getElementById(type+'-months').innerHTML=MONTHS_LBL.map((m,i)=>'<div class="month-box"><input type="checkbox" id="'+type+'-'+i+'" '+(arr[i]?'checked':'')+' onchange="toggleMonthly(\''+type+'\','+i+',this.checked)"><label for="'+type+'-'+i+'">'+m+'</label></div>').join('');}
-function toggleMonthly(type,idx,val){(type==='gym'?gymChecked:stepsChecked)[idx]=val;recalc();}
-function setAllMonthly(type,val){const a=type==='gym'?gymChecked:stepsChecked;a.fill(val);renderMonthlyGrid(type,a);recalc();}
 
 /* ── thresholds ── */
-function renderThresholds(){document.getElementById('threshold-list').innerHTML=thresholds.map((t,i)=>'<div class="threshold-row"><input type="number" value="'+t.pts+'" min="1" step="1000" onchange="updateThreshold('+i+',\'pts\',this.value)"><span class="arrow">pts →</span><input type="number" value="'+t.usd+'" min="1" step="10" onchange="updateThreshold('+i+',\'usd\',this.value)" style="width:64px"><span class="arrow">$</span><button class="del-btn" onclick="removeThreshold('+i+')" title="Remove">×</button></div>').join('');}
+function renderThresholds(){document.getElementById('threshold-list').innerHTML=thresholds.map((t,i)=>'<div class="threshold-row"><input type="number" value="'+t.pts+'" min="1" step="1000" onchange="updateThreshold('+i+',\'pts\',this.value)"><span class="arrow">pebbles →</span><input type="number" value="'+t.usd+'" min="1" step="10" onchange="updateThreshold('+i+',\'usd\',this.value)" style="width:64px"><span class="arrow">$</span><button class="del-btn" onclick="removeThreshold('+i+')" title="Remove">×</button></div>').join('');}
 function updateThreshold(i,k,v){thresholds[i][k]=Number(v);recalc();}
 function addThreshold(){thresholds.push({pts:10000,usd:100});thresholds.sort((a,b)=>a.pts-b.pts);renderThresholds();recalc();}
 function removeThreshold(i){thresholds.splice(i,1);renderThresholds();recalc();}
 
 /* ── streak / consistency bonus steps ── */
-function renderStreakSteps(months){
-  const weeksCompleted=months*4;
+function renderStreakSteps(months,habitsPerMonth,completionPct){
+  /* a consistency streak requires habits actually being completed — no habits, no streak */
+  const active=habitsPerMonth>0&&completionPct>0;
+  const weeksCompleted=active?months*4:0;
   const nextWks=BONUS_MILESTONES_WKS.find(wks=>weeksCompleted<wks);
   let earned=0,possible=0;
   document.getElementById('streak-steps').innerHTML=BONUS_MILESTONES_WKS.map(wks=>{
@@ -521,13 +487,14 @@ function renderStreakSteps(months){
     const status=reached?'✓ earned':(isNext?weeksAway+' wks away':'');
     return '<div class="streak-step '+cls+'">'
       +'<div class="streak-week">'+wks+'-week bonus</div>'
-      +'<div class="streak-pts">+'+pts.toLocaleString()+' pts</div>'
+      +'<div class="streak-pts">+'+pts.toLocaleString()+' pebbles</div>'
       +(status?'<div class="streak-status">'+status+'</div>':'')
       +'</div>';
   }).join('');
   document.getElementById('streak-bonus-total').innerHTML=earned>0
     ?'Consistency bonus earned: <span>'+fmtPts(earned)+'</span> of '+fmtPts(possible)+' possible'
-    :'No consistency bonuses earned yet — max possible: <span>'+fmtPts(possible)+'</span>';
+    :(active?'No consistency bonuses earned yet — max possible: <span>'+fmtPts(possible)+'</span>'
+             :'No consistency bonuses earned yet — complete at least one habit per month to start a streak');
   return earned;
 }
 
@@ -575,9 +542,9 @@ function recalc(){
   const d=Math.max(0,Number(document.getElementById('cfg-habit-daily').value)||0),w=getWeeklyPts();
   document.getElementById('out-habits').textContent=hm;
   document.getElementById('out-habit-pct').textContent=Math.round(hp*100)+'%';
-  document.getElementById('hint-habits').textContent='Max '+hmax+'/month — '+peh.toLocaleString()+' pts each at full completion ('+d+' pts/day x 28 + '+w+' pts/week x 4)';
+  document.getElementById('hint-habits').textContent='Max '+hmax+'/month — '+peh.toLocaleString()+' pebbles each at full completion ('+d+' pebbles/day x 28 + '+w+' pebbles/week x 4)';
   const habitPts=Math.round(hm*peh*hp*months);
-  const streak=renderStreakSteps(months);
+  const streak=renderStreakSteps(months,hm,hp);
   const habitTotal=habitPts+streak;
   document.getElementById('habit-pts-total').textContent=fmtPts(habitTotal);
 
@@ -587,7 +554,7 @@ function recalc(){
   const cp=Number(document.getElementById('sl-challenge-pct').value)/100;
   document.getElementById('out-challenges').textContent=cm;
   document.getElementById('out-challenge-pct').textContent=Math.round(cp*100)+'%';
-  document.getElementById('hint-challenges').textContent='Max '+cmax+'/month — '+pec.toLocaleString()+' pts each at full completion';
+  document.getElementById('hint-challenges').textContent='Max '+cmax+'/month — '+pec.toLocaleString()+' pebbles each at full completion';
   const challengePts=Math.round(cm*pec*cp*months);
   document.getElementById('challenge-pts-total').textContent=fmtPts(challengePts);
 
@@ -597,20 +564,14 @@ function recalc(){
   const lp=Number(document.getElementById('sl-learning-pct').value)/100;
   document.getElementById('out-learning').textContent=lm;
   document.getElementById('out-learning-pct').textContent=Math.round(lp*100)+'%';
-  document.getElementById('hint-learning').textContent='Max '+lmax+'/month — '+pel.toLocaleString()+' pts each at full completion';
+  document.getElementById('hint-learning').textContent='Max '+lmax+'/month — '+pel.toLocaleString()+' pebbles each at full completion';
   const learningPts=Math.round(lm*pel*lp*months);
   document.getElementById('learning-pts-total').textContent=fmtPts(learningPts);
 
   /* healthy actions */
-  const gym1=Math.max(0,Number(document.getElementById('cfg-gym-pts').value)||0);
-  const step1=Math.max(0,Number(document.getElementById('cfg-steps-pts').value)||0);
   const hasGate=gatekeepersActive(),unlocked=!hasGate||allGatekeepersDone();
   let otp=0;oneTimeActivities.forEach(a=>{if(a.excluded||!a.checked)return;if(a.gatekept&&hasGate&&!unlocked)return;otp+=a.pts;});
-  const gymPts=gymChecked.filter(Boolean).length*gym1;
-  const stepPts=stepsChecked.filter(Boolean).length*step1;
-  const actionPts=otp+gymPts+stepPts;
-  document.getElementById('gym-pts-summary').textContent=gymChecked.filter(Boolean).length+' of 12 months — '+fmtPts(gymPts);
-  document.getElementById('steps-pts-summary').textContent=stepsChecked.filter(Boolean).length+' of 12 months — '+fmtPts(stepPts);
+  const actionPts=otp;
 
   /* totals */
   const total=habitTotal+challengePts+actionPts+learningPts;
@@ -624,17 +585,17 @@ function recalc(){
   const dm=Math.max(total,capPts)*1.05||1;
   updateBreakdownBar(habitTotal,challengePts,actionPts,learningPts,dm);
   document.getElementById('cap-line').style.left=((capPts/dm)*100).toFixed(1)+'%';
-  document.getElementById('cap-note').textContent=total>capPts?total.toLocaleString()+' pts earned — all thresholds crossed, max reward '+fmtUsd(mr):'';
+  document.getElementById('cap-note').textContent=total>capPts?total.toLocaleString()+' pebbles earned — all thresholds crossed, max reward '+fmtUsd(mr):'';
 
   document.getElementById('metrics').innerHTML=
-    '<div class="metric"><p class="metric-label">Total points</p><p class="metric-val">'+total.toLocaleString()+'</p><p class="metric-sub">max threshold: '+capPts.toLocaleString()+' pts</p></div>'+
+    '<div class="metric"><p class="metric-label">Total pebbles</p><p class="metric-val">'+total.toLocaleString()+'</p><p class="metric-sub">max threshold: '+capPts.toLocaleString()+' pebbles</p></div>'+
     '<div class="metric"><p class="metric-label">Reward earned</p><p class="metric-val">'+fmtUsd(re)+'</p><p class="metric-sub">max: '+fmtUsd(mr)+'</p></div>'+
     '<div class="metric"><p class="metric-label">Reward balance</p><p class="metric-val-green">'+fmtUsd(bal)+'</p><p class="metric-sub">'+(red>0?fmtUsd(red)+' redeemed':'nothing redeemed')+'</p></div>';
 
   const sorted=[...thresholds].sort((a,b)=>a.pts-b.pts);
   document.getElementById('milestone-labels-above').innerHTML=sorted.map(t=>{const l=Math.min(97,(t.pts/dm)*100);return'<div class="milestone-label-above" style="left:'+l.toFixed(1)+'%"><span class="milestone-label-pts '+(total>=t.pts?'earned':'')+'">'+(t.pts.toLocaleString())+'</span></div>';}).join('');
   document.getElementById('milestone-markers').innerHTML=sorted.map(t=>{const l=Math.min(97,(t.pts/dm)*100);return'<div class="milestone-tick" style="left:'+l.toFixed(1)+'%"><div class="milestone-line"></div><span class="milestone-lbl '+(total>=t.pts?'milestone-earned':'')+'">'+fmtUsd(t.usd)+'</span></div>';}).join('');
-  document.getElementById('badges').innerHTML=sorted.map(t=>{const e=total>=t.pts;return'<span class="reward-badge '+(e?'badge-earned':'badge-pending')+'">'+(e?'✓ ':'')+'+'+fmtUsd(t.usd)+' at '+t.pts.toLocaleString()+' pts</span>';}).join('');
+  document.getElementById('badges').innerHTML=sorted.map(t=>{const e=total>=t.pts;return'<span class="reward-badge '+(e?'badge-earned':'badge-pending')+'">'+(e?'✓ ':'')+'+'+fmtUsd(t.usd)+' at '+t.pts.toLocaleString()+' pebbles</span>';}).join('');
 }
 
 /* ── navigation ── */
@@ -663,7 +624,6 @@ function getCurrentConfig(){
       challengeMax:document.getElementById('cfg-challenge-max').value
     },
     learning:{daily:document.getElementById('cfg-learning-daily').value,completion:document.getElementById('cfg-learning-completion').value,max:document.getElementById('cfg-learning-max').value},
-    monthly:{gymPts:document.getElementById('cfg-gym-pts').value,stepsPts:document.getElementById('cfg-steps-pts').value},
     thresholds:JSON.parse(JSON.stringify(thresholds)),
     activities:oneTimeActivities.map(a=>({...a})),
     noGatekeepers:noGatekeepers
@@ -685,9 +645,6 @@ function applyConfig(cfg){
   if(l.daily!=null)document.getElementById('cfg-learning-daily').value=l.daily;
   if(l.completion!=null)document.getElementById('cfg-learning-completion').value=l.completion;
   if(l.max!=null)document.getElementById('cfg-learning-max').value=l.max;
-  const m=cfg.monthly||{};
-  if(m.gymPts!=null)document.getElementById('cfg-gym-pts').value=m.gymPts;
-  if(m.stepsPts!=null)document.getElementById('cfg-steps-pts').value=m.stepsPts;
   if(cfg.thresholds){thresholds=JSON.parse(JSON.stringify(cfg.thresholds));renderThresholds();}
   if(cfg.activities){oneTimeActivities=cfg.activities.map(a=>({...a}));}
   noGatekeepers=cfg.noGatekeepers||false;
@@ -783,8 +740,6 @@ function renderSavedConfigs(){
 /* ── init ── */
 renderCfgOneTime();
 renderSimOneTime();
-renderMonthlyGrid('gym',gymChecked);
-renderMonthlyGrid('steps',stepsChecked);
 renderThresholds();
 renderSavedConfigs();
 recalc();
