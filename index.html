@@ -134,8 +134,12 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .sub-tab.active{background:var(--green);color:#ffffff;font-weight:500;border-color:var(--green)}
 .sub-pane{display:none}
 .sub-pane.active{display:block}
-.save-input-row{display:flex;gap:8px;align-items:center}
-.save-input-row input{flex:1;font-size:13px}
+.save-field-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.save-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px}
+.save-field label{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)}
+.save-field .req{color:var(--red);font-weight:400}
+.save-field input{font-size:13px;width:100%}
+.save-error{font-size:12px;color:#c1440e;margin-top:9px;display:flex;gap:5px}
 .save-btn{padding:6px 16px;border-radius:var(--radius-md);border:none;font-size:13px;cursor:pointer;background:var(--green);color:#fff;font-family:inherit;font-weight:500;white-space:nowrap}
 .save-btn:hover{background:var(--green-dark)}
 .saved-item{display:flex;align-items:center;gap:10px;padding:11px 13px;border:.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:8px}
@@ -155,7 +159,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .client-group:first-child{margin-top:0}
 .upload-local{font-size:12px;color:var(--green);border:.5px dashed var(--green);background:transparent;cursor:pointer;padding:5px 12px;border-radius:var(--radius-md);font-family:inherit;margin-bottom:12px}
 .upload-local:hover{background:var(--green-light)}
-@media(max-width:520px){.metric-grid{grid-template-columns:repeat(2,1fr)}.row-label{min-width:120px}.streak-steps{grid-template-columns:repeat(3,1fr)}.tab-group-label{min-width:44px;font-size:9px}.save-input-row{flex-wrap:wrap}.breakdown-legend{gap:10px}}
+@media(max-width:520px){.metric-grid{grid-template-columns:repeat(2,1fr)}.row-label{min-width:120px}.streak-steps{grid-template-columns:repeat(3,1fr)}.tab-group-label{min-width:44px;font-size:9px}.save-field{min-width:100%}.breakdown-legend{gap:10px}}
 </style>
 </head>
 <body>
@@ -340,13 +344,20 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
     <p class="section-label" style="margin:0">Saved configurations</p>
   </div>
   <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:14px;margin-bottom:12px">
-    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Save a snapshot of all current configuration settings — multipliers, pebbles, thresholds, and healthy actions — against a client.</p>
-    <div class="save-input-row">
-      <input type="text" id="save-client" autocomplete="off" placeholder="Client (e.g. Acme Corp)" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
-      <input type="text" id="save-name" autocomplete="off" placeholder="Scenario (e.g. Standard plan)" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Name the client and the scenario, then save. The snapshot captures every configuration setting — multipliers, pebbles, thresholds, and healthy actions — so you can load it back later.</p>
+    <div class="save-field-row">
+      <div class="save-field">
+        <label for="save-client">Client <span class="req">required</span></label>
+        <input type="text" id="save-client" autocomplete="off" placeholder="Acme Corp" oninput="clearSaveError()" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
+      </div>
+      <div class="save-field">
+        <label for="save-name">Scenario <span class="req">required</span></label>
+        <input type="text" id="save-name" autocomplete="off" placeholder="Standard plan" oninput="clearSaveError()" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
+      </div>
       <button class="save-btn" onclick="saveCurrentConfig()">Save config</button>
       <span class="inline-feedback" id="save-feedback" style="display:none">Saved!</span>
     </div>
+    <p class="save-error" id="save-error" hidden></p>
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:20px">
     <span style="font-size:12px;color:var(--text-secondary);flex:1;min-width:160px">Share with a colleague — export the current config as a JSON file, or import one they sent you.</span>
@@ -736,13 +747,22 @@ function uploadLocalConfigs(){
     cfgDoc(c.id).set(c).catch(cloudWriteFailed);
   });
 }
-function flagEmpty(el){el.style.borderColor='#e65100';el.focus();setTimeout(function(){el.style.borderColor='';},1200);}
+function saveError(msg,el){
+  const e=document.getElementById('save-error');
+  if(e){e.textContent=msg;e.hidden=false;}
+  if(el){el.style.borderColor='#e65100';el.focus();}
+}
+function clearSaveError(){
+  const e=document.getElementById('save-error');if(e)e.hidden=true;
+  ['save-client','save-name'].forEach(function(id){const el=document.getElementById(id);if(el)el.style.borderColor='';});
+}
 
 function saveCurrentConfig(){
   const clientEl=document.getElementById('save-client'),nameEl=document.getElementById('save-name');
   const client=clientEl.value.trim(),name=nameEl.value.trim();
-  if(!client){flagEmpty(clientEl);return;}
-  if(!name){flagEmpty(nameEl);return;}
+  clearSaveError();
+  if(!client){saveError('Enter a client name before saving.',clientEl);return;}
+  if(!name){saveError('Enter a scenario name — the client can hold several.',nameEl);return;}
   const cfg=getCurrentConfig();
   cfg.client=client;cfg.name=name;cfg.id=String(Date.now());
   cfg.savedAt=new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
