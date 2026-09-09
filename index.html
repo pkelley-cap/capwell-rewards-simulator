@@ -140,6 +140,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .save-field .req{color:var(--red);font-weight:400}
 .save-field input{font-size:13px;width:100%}
 .save-error{font-size:12px;color:#c1440e;margin-top:9px;display:flex;gap:5px}
+.badge-local{font-size:10px;font-weight:400;color:var(--text-tertiary);border:.5px solid var(--border-md);border-radius:4px;padding:1px 5px;margin-left:4px;white-space:nowrap}
 .save-btn{padding:6px 16px;border-radius:var(--radius-md);border:none;font-size:13px;cursor:pointer;background:var(--green);color:#fff;font-family:inherit;font-weight:500;white-space:nowrap}
 .save-btn:hover{background:var(--green-dark)}
 .saved-item{display:flex;align-items:center;gap:10px;padding:11px 13px;border:.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:8px}
@@ -688,6 +689,8 @@ function flashFeedback(elId,msg,ms){
 const CFG_COLLECTION='configs';
 let savedCache=[];   /* what the saved-configs list renders from */
 let localOnly=[];    /* saved in this browser but not yet in shared storage */
+let localOnlyIds={}; /* id -> true, for the "this browser only" row badge */
+let pendingPush=[];  /* saved this session before the db namespace resolved */
 let cloudDb=null;    /* the artifact db namespace once it resolves, else null */
 let cloudDownloads=null; /* the downloads namespace, when this view can save files */
 
@@ -722,11 +725,21 @@ function initCloudStore(){
       snap.docs.forEach(function(d){const r=d.data();if(r&&r.name)rows.push(r);});
       const shared=byNewest(rows),ids={};
       shared.forEach(function(c){ids[String(c.id)]=true;});
+      /* a save made before the namespace resolved is unambiguously new, so push it;
+         older local rows wait for an explicit upload, since auto-pushing them would
+         resurrect configs another viewer deleted */
+      if(pendingPush.length){
+        const flush=pendingPush.filter(function(c){return !ids[String(c.id)];});
+        pendingPush=[];
+        flush.forEach(function(c){cfgDoc(c.id).set(c).catch(cloudWriteFailed);});
+      }
       localOnly=readLocal().filter(function(c){return !ids[String(c.id)];});
-      savedCache=shared;
+      localOnlyIds={};localOnly.forEach(function(c){localOnlyIds[String(c.id)]=true;});
+      /* never drop a row out of the list just because it isn't shared yet */
+      savedCache=byNewest(shared.concat(localOnly));
       setSyncStatus('shared');renderSavedConfigs();
     },function(err){
-      cloudDb=null;localOnly=[];
+      cloudDb=null;localOnly=[];localOnlyIds={};
       savedCache=byNewest(readLocal());
       setSyncStatus(err&&err.code==='revoked'?'local':'error');renderSavedConfigs();
     });
@@ -741,7 +754,7 @@ function refreshUploadPrompt(){
 }
 function uploadLocalConfigs(){
   if(!cloudDb||localOnly.length===0)return;
-  const batch=localOnly.slice();localOnly=[];refreshUploadPrompt();
+  const batch=localOnly.slice();localOnly=[];localOnlyIds={};refreshUploadPrompt();renderSavedConfigs();
   batch.forEach(function(c){
     if(!c.client)c.client='Unassigned';
     cfgDoc(c.id).set(c).catch(cloudWriteFailed);
@@ -771,6 +784,7 @@ function saveCurrentConfig(){
   nameEl.value='';setActiveCfgBadge(name);renderSavedConfigs();
   flashFeedback('save-feedback','Config saved!',1800);
   if(cloudDb)cfgDoc(cfg.id).set(cfg).catch(cloudWriteFailed);
+  else if(window.claude&&typeof window.claude.use==='function')pendingPush.push(cfg);
 }
 function loadSavedConfig(id){
   const cfg=findSaved(id);
@@ -840,8 +854,9 @@ function renderSavedConfigs(){
   list.innerHTML=groups.map(function(g){
     return '<p class="client-group">'+escHtml(g.key)+'</p>'+g.items.map(function(c){
       const isActive=activeConfigName&&c.name===activeConfigName;
+      const isLocal=!!localOnlyIds[String(c.id)];
       return '<div class="saved-item'+(isActive?' is-active':'')+'">'
-        +'<div class="saved-item-info"><div class="saved-item-name">'+escHtml(c.name)+(isActive?' <span style="font-size:10px;color:var(--green-text);font-weight:400">(active)</span>':'')+'</div>'
+        +'<div class="saved-item-info"><div class="saved-item-name">'+escHtml(c.name)+(isActive?' <span style="font-size:10px;color:var(--green-text);font-weight:400">(active)</span>':'')+(isLocal?' <span class="badge-local">this browser only</span>':'')+'</div>'
         +'<div class="saved-item-meta">Saved '+escHtml(c.savedAt||'')+'</div></div>'
         +'<button class="load-btn" style="color:var(--text-secondary);border-color:var(--border-md)" onclick="exportSavedConfig(\''+c.id+'\')" title="Download as JSON">↓ Export</button>'
         +'<button class="load-btn" onclick="loadSavedConfig(\''+c.id+'\')">Load</button>'
