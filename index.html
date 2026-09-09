@@ -342,8 +342,8 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
   <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:14px;margin-bottom:12px">
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Save a snapshot of all current configuration settings — multipliers, pebbles, thresholds, and healthy actions — against a client.</p>
     <div class="save-input-row">
-      <input type="text" id="save-client" placeholder="Client (e.g. Acme Corp)" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
-      <input type="text" id="save-name" placeholder="Scenario (e.g. Standard plan)" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
+      <input type="text" id="save-client" autocomplete="off" placeholder="Client (e.g. Acme Corp)" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
+      <input type="text" id="save-name" autocomplete="off" placeholder="Scenario (e.g. Standard plan)" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
       <button class="save-btn" onclick="saveCurrentConfig()">Save config</button>
       <span class="inline-feedback" id="save-feedback" style="display:none">Saved!</span>
     </div>
