@@ -33,4 +33,21 @@ Saved configs live in your browser's local storage, so they don't travel between
 
 ## Editing
 
+## Saving configurations
+
+Configs are saved against a client name on the **Saved configs** tab, and the list groups scenarios by client.
+
+Storage depends on where the page is running:
+
+- **Opened as a local file** — configs go to `localStorage`, so they stay in that one browser. Use Export / Import JSON to move them between machines or share them.
+- **Published as a Claude Artifact** — configs go to the artifact's shared document store (the `db` capability), so everyone with access to the page sees the same list, and edits show up live. A status line under the save box says which mode is active. If shared storage can't be reached, saves fall back to `localStorage` and the status line says so.
+
+When both apply, an "Upload N configs saved in this browser" button appears so local-only saves can be pushed to shared storage on purpose, rather than silently syncing.
+
+`build-artifact.py` generates the Artifact body from `index.html` — it strips the document skeleton the Artifact runtime supplies itself, so `index.html` stays the single source of truth:
+
+```
+./build-artifact.py            # -> dist/artifact.html
+```
+
 Everything is in one file — HTML, CSS, and JavaScript. Open it in any text editor to change defaults. The starting values for activities, thresholds, and pebble rules are declared as plain JavaScript objects near the top of the `<script>` block.

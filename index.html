@@ -134,8 +134,13 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .sub-tab.active{background:var(--green);color:#ffffff;font-weight:500;border-color:var(--green)}
 .sub-pane{display:none}
 .sub-pane.active{display:block}
-.save-input-row{display:flex;gap:8px;align-items:center}
-.save-input-row input{flex:1;font-size:13px}
+.save-field-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.save-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px}
+.save-field label{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)}
+.save-field .req{color:var(--red);font-weight:400}
+.save-field input{font-size:13px;width:100%}
+.save-error{font-size:12px;color:#c1440e;margin-top:9px;display:flex;gap:5px}
+.badge-local{font-size:10px;font-weight:400;color:var(--text-tertiary);border:.5px solid var(--border-md);border-radius:4px;padding:1px 5px;margin-left:4px;white-space:nowrap}
 .save-btn{padding:6px 16px;border-radius:var(--radius-md);border:none;font-size:13px;cursor:pointer;background:var(--green);color:#fff;font-family:inherit;font-weight:500;white-space:nowrap}
 .save-btn:hover{background:var(--green-dark)}
 .saved-item{display:flex;align-items:center;gap:10px;padding:11px 13px;border:.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:8px}
@@ -147,7 +152,15 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .load-btn:hover{background:var(--green-light)}
 .saved-empty{font-size:13px;color:var(--text-tertiary);text-align:center;padding:28px 0 8px}
 .inline-feedback{font-size:12px;color:var(--green);font-weight:500;min-width:60px}
-@media(max-width:520px){.metric-grid{grid-template-columns:repeat(2,1fr)}.row-label{min-width:120px}.streak-steps{grid-template-columns:repeat(3,1fr)}.tab-group-label{min-width:44px;font-size:9px}.save-input-row{flex-wrap:wrap}.breakdown-legend{gap:10px}}
+.sync-status{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-tertiary);margin:0 0 12px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text-tertiary);flex-shrink:0}
+.sync-status.shared .sync-dot{background:var(--green)}
+.sync-status.error .sync-dot{background:#e65100}
+.client-group{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-tertiary);margin:16px 0 7px}
+.client-group:first-child{margin-top:0}
+.upload-local{font-size:12px;color:var(--green);border:.5px dashed var(--green);background:transparent;cursor:pointer;padding:5px 12px;border-radius:var(--radius-md);font-family:inherit;margin-bottom:12px}
+.upload-local:hover{background:var(--green-light)}
+@media(max-width:520px){.metric-grid{grid-template-columns:repeat(2,1fr)}.row-label{min-width:120px}.streak-steps{grid-template-columns:repeat(3,1fr)}.tab-group-label{min-width:44px;font-size:9px}.save-field{min-width:100%}.breakdown-legend{gap:10px}}
 </style>
 </head>
 <body>
@@ -332,12 +345,20 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
     <p class="section-label" style="margin:0">Saved configurations</p>
   </div>
   <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:14px;margin-bottom:12px">
-    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Name and save a snapshot of all current configuration settings — multipliers, pebbles, thresholds, and healthy actions.</p>
-    <div class="save-input-row">
-      <input type="text" id="save-name" placeholder="e.g. Acme Corp — Standard plan" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Name the client and the scenario, then save. The snapshot captures every configuration setting — multipliers, pebbles, thresholds, and healthy actions — so you can load it back later.</p>
+    <div class="save-field-row">
+      <div class="save-field">
+        <label for="save-client">Client <span class="req">required</span></label>
+        <input type="text" id="save-client" autocomplete="off" placeholder="Acme Corp" oninput="clearSaveError()" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
+      </div>
+      <div class="save-field">
+        <label for="save-name">Scenario <span class="req">required</span></label>
+        <input type="text" id="save-name" autocomplete="off" placeholder="Standard plan" oninput="clearSaveError()" onkeydown="if(event.key==='Enter')saveCurrentConfig()">
+      </div>
       <button class="save-btn" onclick="saveCurrentConfig()">Save config</button>
       <span class="inline-feedback" id="save-feedback" style="display:none">Saved!</span>
     </div>
+    <p class="save-error" id="save-error" hidden></p>
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:20px">
     <span style="font-size:12px;color:var(--text-secondary);flex:1;min-width:160px">Share with a colleague — export the current config as a JSON file, or import one they sent you.</span>
@@ -347,6 +368,8 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
     </label>
     <span class="inline-feedback" id="import-feedback" style="display:none">Config loaded!</span>
   </div>
+  <div class="sync-status" id="sync-status"><span class="sync-dot"></span><span id="sync-status-text">Saved to this browser only</span></div>
+  <button class="upload-local" id="upload-local" style="display:none" onclick="uploadLocalConfigs()"></button>
   <div id="saved-list"></div>
   <p class="saved-empty" id="saved-empty">No saved configurations yet. Adjust your settings and save one above.</p>
 </div>
@@ -662,37 +685,133 @@ function flashFeedback(elId,msg,ms){
   el.textContent=msg;el.style.display='';
   setTimeout(function(){el.style.display='none';},ms||1600);
 }
+/* ── config store: shared artifact db when this view has one, localStorage otherwise ── */
+const CFG_COLLECTION='configs';
+let savedCache=[];   /* what the saved-configs list renders from */
+let localOnly=[];    /* saved in this browser but not yet in shared storage */
+let localOnlyIds={}; /* id -> true, for the "this browser only" row badge */
+let pendingPush=[];  /* saved this session before the db namespace resolved */
+let cloudDb=null;    /* the artifact db namespace once it resolves, else null */
+let cloudDownloads=null; /* the downloads namespace, when this view can save files */
+
+function readLocal(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'[]');}catch(e){return[];}}
+function writeLocal(list){try{localStorage.setItem(STORE_KEY,JSON.stringify(list));}catch(e){}}
+function sameId(a,b){return String(a)===String(b);}
+function byNewest(list){return list.slice().sort(function(a,b){return Number(b.id||0)-Number(a.id||0);});}
+function cfgDoc(id){return cloudDb.doc(CFG_COLLECTION+'/'+String(id));}
+function findSaved(id){return savedCache.find(function(c){return sameId(c.id,id);});}
+
+function setSyncStatus(state,detail){
+  const el=document.getElementById('sync-status'),txt=document.getElementById('sync-status-text');
+  if(!el||!txt)return;
+  el.className='sync-status'+(state==='shared'?' shared':state==='error'?' error':'');
+  txt.textContent=detail||(state==='shared'?'Shared — everyone with access to this page sees these configs'
+    :state==='error'?'Shared storage unavailable — saving to this browser only'
+    :'Saved to this browser only');
+}
+function cloudWriteFailed(e){
+  setSyncStatus('error','Could not reach shared storage ('+((e&&e.code)||'unknown')+') — the change is saved in this browser');
+}
+/* the db namespace arrives late and may never arrive — render from localStorage
+   first, then let shared storage take over if this view can run it */
+function initCloudStore(){
+  if(!(window.claude&&typeof window.claude.use==='function'))return;
+  window.claude.use('downloads').then(function(d){cloudDownloads=d||null;}).catch(function(){});
+  window.claude.use('db').then(function(db){
+    if(!db)return;
+    cloudDb=db;
+    db.collection(CFG_COLLECTION).onSnapshot(function(snap){
+      const rows=[];
+      snap.docs.forEach(function(d){const r=d.data();if(r&&r.name)rows.push(r);});
+      const shared=byNewest(rows),ids={};
+      shared.forEach(function(c){ids[String(c.id)]=true;});
+      /* a save made before the namespace resolved is unambiguously new, so push it;
+         older local rows wait for an explicit upload, since auto-pushing them would
+         resurrect configs another viewer deleted */
+      if(pendingPush.length){
+        const flush=pendingPush.filter(function(c){return !ids[String(c.id)];});
+        pendingPush=[];
+        flush.forEach(function(c){cfgDoc(c.id).set(c).catch(cloudWriteFailed);});
+      }
+      localOnly=readLocal().filter(function(c){return !ids[String(c.id)];});
+      localOnlyIds={};localOnly.forEach(function(c){localOnlyIds[String(c.id)]=true;});
+      /* never drop a row out of the list just because it isn't shared yet */
+      savedCache=byNewest(shared.concat(localOnly));
+      setSyncStatus('shared');renderSavedConfigs();
+    },function(err){
+      cloudDb=null;localOnly=[];localOnlyIds={};
+      savedCache=byNewest(readLocal());
+      setSyncStatus(err&&err.code==='revoked'?'local':'error');renderSavedConfigs();
+    });
+  }).catch(function(){});
+}
+function refreshUploadPrompt(){
+  const btn=document.getElementById('upload-local');
+  if(!btn)return;
+  if(!cloudDb||localOnly.length===0){btn.style.display='none';return;}
+  btn.style.display='';
+  btn.textContent='↑ Upload '+localOnly.length+' config'+(localOnly.length===1?'':'s')+' saved in this browser';
+}
+function uploadLocalConfigs(){
+  if(!cloudDb||localOnly.length===0)return;
+  const batch=localOnly.slice();localOnly=[];localOnlyIds={};refreshUploadPrompt();renderSavedConfigs();
+  batch.forEach(function(c){
+    if(!c.client)c.client='Unassigned';
+    cfgDoc(c.id).set(c).catch(cloudWriteFailed);
+  });
+}
+function saveError(msg,el){
+  const e=document.getElementById('save-error');
+  if(e){e.textContent=msg;e.hidden=false;}
+  if(el){el.style.borderColor='#e65100';el.focus();}
+}
+function clearSaveError(){
+  const e=document.getElementById('save-error');if(e)e.hidden=true;
+  ['save-client','save-name'].forEach(function(id){const el=document.getElementById(id);if(el)el.style.borderColor='';});
+}
+
 function saveCurrentConfig(){
-  const nameEl=document.getElementById('save-name');
-  const name=nameEl.value.trim();
-  if(!name){nameEl.style.borderColor='#e65100';nameEl.focus();setTimeout(function(){nameEl.style.borderColor='';},1200);return;}
-  const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
+  const clientEl=document.getElementById('save-client'),nameEl=document.getElementById('save-name');
+  const client=clientEl.value.trim(),name=nameEl.value.trim();
+  clearSaveError();
+  if(!client){saveError('Enter a client name before saving.',clientEl);return;}
+  if(!name){saveError('Enter a scenario name — the client can hold several.',nameEl);return;}
   const cfg=getCurrentConfig();
-  cfg.name=name;cfg.id=Date.now();
+  cfg.client=client;cfg.name=name;cfg.id=String(Date.now());
   cfg.savedAt=new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
-  saved.unshift(cfg);
-  localStorage.setItem(STORE_KEY,JSON.stringify(saved));
+  savedCache=byNewest(savedCache.concat([cfg]));
+  writeLocal(savedCache);
   nameEl.value='';setActiveCfgBadge(name);renderSavedConfigs();
   flashFeedback('save-feedback','Config saved!',1800);
+  if(cloudDb)cfgDoc(cfg.id).set(cfg).catch(cloudWriteFailed);
+  else if(window.claude&&typeof window.claude.use==='function')pendingPush.push(cfg);
 }
 function loadSavedConfig(id){
-  const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
-  const cfg=saved.find(function(c){return c.id===id;});
+  const cfg=findSaved(id);
   if(!cfg)return;applyConfig(cfg);setActiveCfgBadge(cfg.name);renderSavedConfigs();
 }
 function deleteSavedConfig(id){
-  let saved=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
-  const cfg=saved.find(function(c){return c.id===id;});
-  saved=saved.filter(function(c){return c.id!==id;});
-  localStorage.setItem(STORE_KEY,JSON.stringify(saved));
+  const cfg=findSaved(id);
+  savedCache=savedCache.filter(function(c){return !sameId(c.id,id);});
+  localOnly=localOnly.filter(function(c){return !sameId(c.id,id);});
+  writeLocal(savedCache);
   if(cfg&&cfg.name===activeConfigName)setActiveCfgBadge(null);
   renderSavedConfigs();
+  if(cloudDb)cfgDoc(id).delete().catch(cloudWriteFailed);
 }
 function exportConfig(cfg){
-  const name=(cfg.name||'capwell-config').replace(/[^a-z0-9]/gi,'-').toLowerCase();
-  const blob=new Blob([JSON.stringify(cfg,null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');
-  a.href=url;a.download=name+'.json';a.click();URL.revokeObjectURL(url);
+  const base=[cfg.client,cfg.name].filter(Boolean).join('-')||'capwell-config';
+  const name=base.replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()+'.json';
+  const json=JSON.stringify(cfg,null,2);
+  /* a viewer sandbox makes <a download> inert, so use the capability when this view has it */
+  if(cloudDownloads){
+    cloudDownloads.save({filename:name,data:json}).catch(function(e){
+      if(e&&e.code!=='declined')flashFeedback('import-feedback','Export failed ('+((e&&e.code)||'unknown')+')',3000);
+    });
+    return;
+  }
+  const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);
 }
 function exportCurrentConfig(){
   const cfg=getCurrentConfig();
@@ -700,8 +819,7 @@ function exportCurrentConfig(){
   exportConfig(cfg);
 }
 function exportSavedConfig(id){
-  const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
-  const cfg=saved.find(function(c){return c.id===id;});
+  const cfg=findSaved(id);
   if(cfg)exportConfig(cfg);
 }
 function importConfigFromFile(input){
@@ -720,20 +838,31 @@ function importConfigFromFile(input){
   reader.readAsText(file);
 }
 function renderSavedConfigs(){
-  const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');
-  const list=document.getElementById('saved-list');const empty=document.getElementById('saved-empty');
+  const list=document.getElementById('saved-list'),empty=document.getElementById('saved-empty');
   if(!list)return;
-  if(saved.length===0){list.innerHTML='';if(empty)empty.style.display='';return;}
+  refreshUploadPrompt();
+  if(savedCache.length===0){list.innerHTML='';if(empty)empty.style.display='';return;}
   if(empty)empty.style.display='none';
-  list.innerHTML=saved.map(function(c){
-    const isActive=activeConfigName&&c.name===activeConfigName;
-    return '<div class="saved-item'+(isActive?' is-active':'')+'">'
-      +'<div class="saved-item-info"><div class="saved-item-name">'+escHtml(c.name)+(isActive?' <span style="font-size:10px;color:var(--green-text);font-weight:400">(active)</span>':'')+'</div>'
-      +'<div class="saved-item-meta">Saved '+escHtml(c.savedAt)+'</div></div>'
-      +'<button class="load-btn" style="color:var(--text-secondary);border-color:var(--border-md)" onclick="exportSavedConfig('+c.id+')" title="Download as JSON">↓ Export</button>'
-      +'<button class="load-btn" onclick="loadSavedConfig('+c.id+')">Load</button>'
-      +'<button class="del-btn" onclick="deleteSavedConfig('+c.id+')" title="Delete">×</button>'
-      +'</div>';
+  const groups=[];
+  savedCache.forEach(function(c){
+    const key=c.client||'Unassigned';
+    let g=groups.find(function(x){return x.key===key;});
+    if(!g){g={key:key,items:[]};groups.push(g);}
+    g.items.push(c);
+  });
+  groups.sort(function(a,b){return a.key.localeCompare(b.key);});
+  list.innerHTML=groups.map(function(g){
+    return '<p class="client-group">'+escHtml(g.key)+'</p>'+g.items.map(function(c){
+      const isActive=activeConfigName&&c.name===activeConfigName;
+      const isLocal=!!localOnlyIds[String(c.id)];
+      return '<div class="saved-item'+(isActive?' is-active':'')+'">'
+        +'<div class="saved-item-info"><div class="saved-item-name">'+escHtml(c.name)+(isActive?' <span style="font-size:10px;color:var(--green-text);font-weight:400">(active)</span>':'')+(isLocal?' <span class="badge-local">this browser only</span>':'')+'</div>'
+        +'<div class="saved-item-meta">Saved '+escHtml(c.savedAt||'')+'</div></div>'
+        +'<button class="load-btn" style="color:var(--text-secondary);border-color:var(--border-md)" onclick="exportSavedConfig(\''+c.id+'\')" title="Download as JSON">↓ Export</button>'
+        +'<button class="load-btn" onclick="loadSavedConfig(\''+c.id+'\')">Load</button>'
+        +'<button class="del-btn" onclick="deleteSavedConfig(\''+c.id+'\')" title="Delete">×</button>'
+        +'</div>';
+    }).join('');
   }).join('');
 }
 
@@ -741,8 +870,11 @@ function renderSavedConfigs(){
 renderCfgOneTime();
 renderSimOneTime();
 renderThresholds();
+savedCache=byNewest(readLocal());
+setSyncStatus('local');
 renderSavedConfigs();
 recalc();
+initCloudStore();
 </script>
 </body>
 </html>
