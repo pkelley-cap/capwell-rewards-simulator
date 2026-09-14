@@ -140,6 +140,14 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .save-field .req{color:var(--red);font-weight:400}
 .save-field input{font-size:13px;width:100%}
 .save-error{font-size:12px;color:#c1440e;margin-top:9px;display:flex;gap:5px}
+.ww-ladder{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}
+.ww-tier{border:.5px solid var(--border);border-radius:var(--radius-md);padding:9px 10px;text-align:center}
+.ww-tier.reached{background:var(--green-light);border-color:var(--green)}
+.ww-tier-steps{font-size:11px;color:var(--text-tertiary)}
+.ww-tier.reached .ww-tier-steps{color:var(--green-text)}
+.ww-tier-pts{font-size:14px;font-weight:500;color:var(--text-primary);margin-top:2px}
+.ww-tier.reached .ww-tier-pts{color:var(--green-dark)}
+.ww-tier-status{font-size:10px;color:var(--green-text);margin-top:2px}
 .badge-local{font-size:10px;font-weight:400;color:var(--text-tertiary);border:.5px solid var(--border-md);border-radius:4px;padding:1px 5px;margin-left:4px;white-space:nowrap}
 .save-btn{padding:6px 16px;border-radius:var(--radius-md);border:none;font-size:13px;cursor:pointer;background:var(--green);color:#fff;font-family:inherit;font-weight:500;white-space:nowrap}
 .save-btn:hover{background:var(--green-dark)}
@@ -160,14 +168,14 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .client-group:first-child{margin-top:0}
 .upload-local{font-size:12px;color:var(--green);border:.5px dashed var(--green);background:transparent;cursor:pointer;padding:5px 12px;border-radius:var(--radius-md);font-family:inherit;margin-bottom:12px}
 .upload-local:hover{background:var(--green-light)}
-@media(max-width:520px){.metric-grid{grid-template-columns:repeat(2,1fr)}.row-label{min-width:120px}.streak-steps{grid-template-columns:repeat(3,1fr)}.tab-group-label{min-width:44px;font-size:9px}.save-field{min-width:100%}.breakdown-legend{gap:10px}}
+@media(max-width:520px){.ww-ladder{grid-template-columns:repeat(2,minmax(0,1fr))}.metric-grid{grid-template-columns:repeat(2,1fr)}.row-label{min-width:120px}.streak-steps{grid-template-columns:repeat(3,1fr)}.tab-group-label{min-width:44px;font-size:9px}.save-field{min-width:100%}.breakdown-legend{gap:10px}}
 </style>
 </head>
 <body>
 <div class="page-wrap">
 <div class="page-header">
   <h1>Healthcare rewards simulator</h1>
-  <p>Model annual pebbles and reward earnings across habits, challenges, healthy actions, and learning tracks.</p>
+  <p>Model annual pebbles and reward earnings across habits, challenges, healthy actions, learning tracks, and walk well.</p>
 </div>
 
 <!-- EARNINGS BOX -->
@@ -185,6 +193,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
         <div class="progress-seg" id="bseg-challenges" style="background:#EF9F27;width:0%"></div>
         <div class="progress-seg" id="bseg-actions"    style="background:#378ADD;width:0%"></div>
         <div class="progress-seg" id="bseg-learning"   style="background:#8B5CF6;width:0%"></div>
+        <div class="progress-seg" id="bseg-walkwell"   style="background:#1D9E75;width:0%"></div>
       </div>
       <div class="progress-cap-line" id="cap-line" style="left:80%"></div>
     </div>
@@ -195,6 +204,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
     <div class="legend-item"><span class="legend-dot" style="background:#EF9F27"></span>Challenges: <span class="legend-pts">0 pebbles</span></div>
     <div class="legend-item"><span class="legend-dot" style="background:#378ADD"></span>Healthy actions: <span class="legend-pts">0 pebbles</span></div>
     <div class="legend-item"><span class="legend-dot" style="background:#8B5CF6"></span>Learning tracks: <span class="legend-pts">0 pebbles</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#1D9E75"></span>Walk well: <span class="legend-pts">0 pebbles</span></div>
   </div>
   <div class="cap-note" id="cap-note"></div>
   <div id="badges" style="margin-bottom:4px"></div>
@@ -208,6 +218,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
     <button class="tab" onclick="switchTab('challenges')">Challenges</button>
     <button class="tab" onclick="switchTab('learning')">Learning tracks</button>
     <button class="tab" onclick="switchTab('activities')">Healthy actions</button>
+    <button class="tab" onclick="switchTab('walkwell')">Walk well</button>
     <button class="tab" onclick="switchTab('redemption')">Redemption</button>
   </div>
   <div class="tab-group">
@@ -266,6 +277,18 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
   <div id="onetime-list"></div>
 </div>
 
+<!-- WALK WELL TAB -->
+<div id="tab-walkwell" class="card" style="display:none">
+  <div class="card-header">
+    <p class="section-label" style="margin:0">Walk well</p>
+    <div class="card-pts-summary"><p class="card-pts-label">Total pebbles earned from walk well this year</p><p class="card-pts-val" id="walkwell-pts-total">0 pebbles</p></div>
+  </div>
+  <div class="row"><span class="row-label">Months completed</span><input type="range" min="0" max="12" step="1" id="sl-months-w" value="0" oninput="syncMonths('w');recalc()"><span class="row-val" id="out-months-w">0</span></div>
+  <div class="row"><span class="row-label">Daily steps</span><input type="range" min="0" max="12500" step="500" id="sl-steps" value="0" oninput="recalc()"><span class="row-val" id="out-steps">0</span></div>
+  <div class="hint" id="hint-walkwell"></div>
+  <div class="ww-ladder" id="ww-ladder"></div>
+</div>
+
 <!-- REDEMPTION TAB -->
 <div id="tab-redemption" class="card" style="display:none">
   <p class="section-label">Redemption</p>
@@ -316,6 +339,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 <div id="tab-config" class="card" style="display:none">
   <div class="sub-tab-row">
     <button class="sub-tab active" onclick="switchSubTab('cc-actions')">Healthy actions</button>
+    <button class="sub-tab" onclick="switchSubTab('cc-walkwell')">Walk well</button>
     <button class="sub-tab" onclick="switchSubTab('cc-thresholds')">Reward thresholds</button>
   </div>
 
@@ -328,6 +352,17 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
     </div>
     <div id="cfg-onetime-list"></div>
     <button class="add-btn" onclick="addOneTime()" style="margin-bottom:4px">+ add action</button>
+  </div>
+
+  <!-- Walk well -->
+  <div id="cc-walkwell" class="sub-pane">
+    <p class="section-label">Walk well</p>
+    <p style="font-size:12px;color:var(--text-tertiary);margin:0 0 12px">Pebbles earned per day at each daily step threshold. A member earns the single highest threshold their step count reaches — the tiers don't stack.</p>
+    <div class="config-row"><label>2,500 steps / day</label><input type="number" id="cfg-ww-2500" min="0" step="1" value="5" oninput="recalc()"><span class="unit">pebbles</span></div>
+    <div class="config-row"><label>5,000 steps / day</label><input type="number" id="cfg-ww-5000" min="0" step="1" value="10" oninput="recalc()"><span class="unit">pebbles</span></div>
+    <div class="config-row"><label>7,500 steps / day</label><input type="number" id="cfg-ww-7500" min="0" step="1" value="15" oninput="recalc()"><span class="unit">pebbles</span></div>
+    <div class="config-row" style="margin-bottom:4px"><label>10,000 steps / day</label><input type="number" id="cfg-ww-10000" min="0" step="1" value="20" oninput="recalc()"><span class="unit">pebbles</span></div>
+    <div class="derived-note" id="walkwell-derived-note"></div>
   </div>
 
   <!-- Reward Thresholds -->
@@ -379,9 +414,12 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 <script>
 // Consistency bonus milestones in WEEKS. Compared against months*4.
 const BONUS_MILESTONES_WKS=[4,8,12];
-const ALL_TABS=['habits','challenges','learning','activities','redemption','global','config','saved'];
+const ALL_TABS=['habits','challenges','learning','activities','walkwell','redemption','global','config','saved'];
 const STORE_KEY='capwell_sim_configs_v1';
-const COL_HABITS='#D85A30',COL_CHALLENGES='#EF9F27',COL_ACTIONS='#378ADD',COL_LEARNING='#8B5CF6';
+const COL_HABITS='#D85A30',COL_CHALLENGES='#EF9F27',COL_ACTIONS='#378ADD',COL_LEARNING='#8B5CF6',COL_WALKWELL='#1D9E75';
+/* step tiers pay the highest one reached, not the sum */
+const WW_TIERS=[2500,5000,7500,10000];
+const WW_DAYS_PER_MONTH=30;
 
 let noGatekeepers=false, activeConfigName=null;
 let oneTimeActivities=[
@@ -401,13 +439,25 @@ let oneTimeActivities=[
 ];
 let thresholds=[{pts:3000,usd:50},{pts:6000,usd:50},{pts:9000,usd:50},{pts:12000,usd:50}];
 let nextId=210, currentRewardEarned=0;
-let segmentOrder=['habits','challenges','actions','learning'];
-const SEG_META={habits:{color:COL_HABITS,label:'Habits'},challenges:{color:COL_CHALLENGES,label:'Challenges'},actions:{color:COL_ACTIONS,label:'Healthy actions'},learning:{color:COL_LEARNING,label:'Learning tracks'}};
+let segmentOrder=['habits','challenges','actions','learning','walkwell'];
+const SEG_META={habits:{color:COL_HABITS,label:'Habits'},challenges:{color:COL_CHALLENGES,label:'Challenges'},actions:{color:COL_ACTIONS,label:'Healthy actions'},learning:{color:COL_LEARNING,label:'Learning tracks'},walkwell:{color:COL_WALKWELL,label:'Walk well'}};
 
 /* ── helpers ── */
 function habitPtsEach(){const d=Math.max(0,Number(document.getElementById('cfg-habit-daily').value)||0);const w=Math.max(0,Number(document.getElementById('cfg-habit-weekly').value)||0);return(d*28)+(w*4);}
 function challengePtsEach(){const cp=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoint-pts').value)||0);const nc=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoints').value)||0);const comp=Math.max(0,Number(document.getElementById('cfg-challenge-completion-pts').value)||0);return(cp*nc)+comp;}
 function learningPtsEach(){const d=Math.max(0,Number(document.getElementById('cfg-learning-daily').value)||0);const c=Math.max(0,Number(document.getElementById('cfg-learning-completion').value)||0);return(d*10)+c;}
+function wwTierPts(steps){return Math.max(0,Number(document.getElementById('cfg-ww-'+steps).value)||0);}
+/* the highest tier the step count reaches; 0 below the first tier */
+function wwDailyPts(steps){
+  let pts=0;
+  WW_TIERS.forEach(function(t){if(steps>=t)pts=wwTierPts(t);});
+  return pts;
+}
+function wwTierReached(steps){
+  let reached=null;
+  WW_TIERS.forEach(function(t){if(steps>=t)reached=t;});
+  return reached;
+}
 function getWeeklyPts(){return Math.max(0,Number(document.getElementById('cfg-habit-weekly').value)||0);}
 function getMult(wks){return Math.max(0,Number(document.getElementById('cfg-mult-'+wks).value)||0);}
 function getBonusPts(wks){return Math.round(getWeeklyPts()*getMult(wks));}
@@ -421,11 +471,11 @@ function calcMaxReward(){return thresholds.reduce((s,t)=>s+t.usd,0);}
 function gatekeepersActive(){return !noGatekeepers&&oneTimeActivities.some(a=>!a.excluded&&a.gatekeeper)&&oneTimeActivities.some(a=>!a.excluded&&a.gatekept);}
 function allGatekeepersDone(){return oneTimeActivities.filter(a=>!a.excluded&&a.gatekeeper).every(a=>a.checked);}
 
+const MONTH_SLIDERS={m:'sl-months',c:'sl-months-c',l:'sl-months-l',w:'sl-months-w'};
 function syncMonths(src){
-  const v=src==='m'?document.getElementById('sl-months').value:src==='c'?document.getElementById('sl-months-c').value:document.getElementById('sl-months-l').value;
-  document.getElementById('sl-months').value=v;
-  document.getElementById('sl-months-c').value=v;
-  document.getElementById('sl-months-l').value=v;
+  const from=MONTH_SLIDERS[src]||'sl-months';
+  const v=document.getElementById(from).value;
+  Object.keys(MONTH_SLIDERS).forEach(function(k){document.getElementById(MONTH_SLIDERS[k]).value=v;});
 }
 function toggleNoGatekeepers(){noGatekeepers=document.getElementById('cfg-no-gatekeepers').checked;renderCfgOneTime();renderSimOneTime();recalc();}
 function syncHabitMax(){const max=cfgVal('cfg-habit-max');const sl=document.getElementById('sl-habits');sl.max=max;if(Number(sl.value)>max)sl.value=max;recalc();}
@@ -440,6 +490,21 @@ function updateReadonlyBonuses(){
     document.getElementById('ro-bonus-'+wks).textContent=fmtPts(pts);
     document.getElementById('ro-formula-'+wks).textContent=w+' pebbles x '+mult+'x';
   });
+}
+function updateWalkWellDerivedNote(){
+  const top=wwTierPts(WW_TIERS[WW_TIERS.length-1]);
+  document.getElementById('walkwell-derived-note').innerHTML='Max pebbles per month: <span>'+(top*WW_DAYS_PER_MONTH).toLocaleString()+' pebbles</span> ('+top+' pebbles/day x '+WW_DAYS_PER_MONTH+' days at 10,000 steps)';
+}
+function renderWwLadder(steps){
+  const reached=wwTierReached(steps);
+  document.getElementById('ww-ladder').innerHTML=WW_TIERS.map(function(t){
+    const isReached=t===reached;
+    return '<div class="ww-tier'+(isReached?' reached':'')+'">'
+      +'<div class="ww-tier-steps">'+t.toLocaleString()+' steps</div>'
+      +'<div class="ww-tier-pts">'+wwTierPts(t).toLocaleString()+' pebbles/day</div>'
+      +(isReached?'<div class="ww-tier-status">&#10003; earning</div>':'')
+      +'</div>';
+  }).join('');
 }
 function updateChallengeDerivedNote(){const cp=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoint-pts').value)||0);const nc=Math.max(0,Number(document.getElementById('cfg-challenge-checkpoints').value)||0);const comp=Math.max(0,Number(document.getElementById('cfg-challenge-completion-pts').value)||0);document.getElementById('challenge-derived-note').innerHTML='Max pebbles per challenge: <span>'+(cp*nc+comp).toLocaleString()+' pebbles</span> ('+cp+' x '+nc+' checkpoints + '+comp+' completion bonus)';}
 function updateLearningDerivedNote(){const d=Math.max(0,Number(document.getElementById('cfg-learning-daily').value)||0);const c=Math.max(0,Number(document.getElementById('cfg-learning-completion').value)||0);document.getElementById('learning-derived-note').innerHTML='Max pebbles per track: <span>'+((d*10)+c).toLocaleString()+' pebbles</span> ('+d+' pebbles/day x 10 days + '+c+' completion bonus)';}
@@ -528,9 +593,9 @@ function moveSegment(name,dir){
   segmentOrder[i]=segmentOrder[j];segmentOrder[j]=name;
   recalc();
 }
-function updateBreakdownBar(habitTotal,challengePts,actionPts,learningPts,dm){
-  var pts={habits:habitTotal,challenges:challengePts,actions:actionPts,learning:learningPts};
-  var total=habitTotal+challengePts+actionPts+learningPts;
+function updateBreakdownBar(habitTotal,challengePts,actionPts,learningPts,walkwellPts,dm){
+  var pts={habits:habitTotal,challenges:challengePts,actions:actionPts,learning:learningPts,walkwell:walkwellPts};
+  var total=habitTotal+challengePts+actionPts+learningPts+walkwellPts;
   var fillPct=Math.min(100,(total/dm)*100);
   function seg(v){return total>0?((v/total)*fillPct).toFixed(2):'0';}
   // width + CSS flex order so bar reflects user's chosen sequence
@@ -552,11 +617,11 @@ function updateBreakdownBar(habitTotal,challengePts,actionPts,learningPts,dm){
 
 /* ── main recalc ── */
 function recalc(){
-  updateReadonlyBonuses();updateChallengeDerivedNote();updateLearningDerivedNote();renderSimOneTime();
+  updateReadonlyBonuses();updateChallengeDerivedNote();updateLearningDerivedNote();updateWalkWellDerivedNote();renderSimOneTime();
 
   const months=Math.min(12,Math.max(0,Number(document.getElementById('sl-months').value)||0));
-  ['sl-months','sl-months-c','sl-months-l'].forEach(id=>document.getElementById(id).value=months);
-  ['out-months','out-months-c','out-months-l'].forEach(id=>document.getElementById(id).textContent=months);
+  ['sl-months','sl-months-c','sl-months-l','sl-months-w'].forEach(id=>document.getElementById(id).value=months);
+  ['out-months','out-months-c','out-months-l','out-months-w'].forEach(id=>document.getElementById(id).textContent=months);
 
   /* habits */
   const peh=habitPtsEach(),hmax=cfgVal('cfg-habit-max');
@@ -596,8 +661,20 @@ function recalc(){
   let otp=0;oneTimeActivities.forEach(a=>{if(a.excluded||!a.checked)return;if(a.gatekept&&hasGate&&!unlocked)return;otp+=a.pts;});
   const actionPts=otp;
 
+  /* walk well */
+  const steps=Math.max(0,Number(document.getElementById('sl-steps').value)||0);
+  const wwDaily=wwDailyPts(steps),wwTier=wwTierReached(steps);
+  const wwMonthly=wwDaily*WW_DAYS_PER_MONTH;
+  const walkwellPts=Math.round(wwMonthly*months);
+  document.getElementById('out-steps').textContent=steps.toLocaleString();
+  document.getElementById('hint-walkwell').textContent=wwTier
+    ?'At '+steps.toLocaleString()+' steps/day the '+wwTier.toLocaleString()+'-step tier applies — '+wwDaily+' pebbles/day x '+WW_DAYS_PER_MONTH+' days = '+wwMonthly.toLocaleString()+' pebbles/month'
+    :'Below the '+WW_TIERS[0].toLocaleString()+'-step tier — no walk well pebbles earned';
+  document.getElementById('walkwell-pts-total').textContent=fmtPts(walkwellPts);
+  renderWwLadder(steps);
+
   /* totals */
-  const total=habitTotal+challengePts+actionPts+learningPts;
+  const total=habitTotal+challengePts+actionPts+learningPts+walkwellPts;
   const capPts=maxThresholdPts(),re=calcRewardEarned(total),mr=calcMaxReward();
   currentRewardEarned=re;
   const rel=document.getElementById('redemption-amt');
@@ -606,7 +683,7 @@ function recalc(){
   document.getElementById('redemption-note').textContent=re>0?'Max redeemable: '+fmtUsd(re)+' — Balance after redemption: '+fmtUsd(bal):'No reward earned yet.';
 
   const dm=Math.max(total,capPts)*1.05||1;
-  updateBreakdownBar(habitTotal,challengePts,actionPts,learningPts,dm);
+  updateBreakdownBar(habitTotal,challengePts,actionPts,learningPts,walkwellPts,dm);
   document.getElementById('cap-line').style.left=((capPts/dm)*100).toFixed(1)+'%';
   document.getElementById('cap-note').textContent=total>capPts?total.toLocaleString()+' pebbles earned — all thresholds crossed, max reward '+fmtUsd(mr):'';
 
@@ -647,6 +724,7 @@ function getCurrentConfig(){
       challengeMax:document.getElementById('cfg-challenge-max').value
     },
     learning:{daily:document.getElementById('cfg-learning-daily').value,completion:document.getElementById('cfg-learning-completion').value,max:document.getElementById('cfg-learning-max').value},
+    walkwell:WW_TIERS.reduce(function(o,t){o[t]=document.getElementById('cfg-ww-'+t).value;return o;},{}),
     thresholds:JSON.parse(JSON.stringify(thresholds)),
     activities:oneTimeActivities.map(a=>({...a})),
     noGatekeepers:noGatekeepers
@@ -668,6 +746,8 @@ function applyConfig(cfg){
   if(l.daily!=null)document.getElementById('cfg-learning-daily').value=l.daily;
   if(l.completion!=null)document.getElementById('cfg-learning-completion').value=l.completion;
   if(l.max!=null)document.getElementById('cfg-learning-max').value=l.max;
+  const ww=cfg.walkwell||{};
+  WW_TIERS.forEach(function(t){if(ww[t]!=null)document.getElementById('cfg-ww-'+t).value=ww[t];});
   if(cfg.thresholds){thresholds=JSON.parse(JSON.stringify(cfg.thresholds));renderThresholds();}
   if(cfg.activities){oneTimeActivities=cfg.activities.map(a=>({...a}));}
   noGatekeepers=cfg.noGatekeepers||false;
