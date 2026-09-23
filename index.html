@@ -41,7 +41,8 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .milestone-lbl{font-size:10px;color:var(--text-tertiary);white-space:nowrap;margin-top:2px}
 .milestone-earned{color:var(--green)!important;font-weight:500}
 .breakdown-legend{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 10px}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);white-space:nowrap}
+.nb{white-space:nowrap}
 .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .legend-pts{font-weight:500;color:var(--text-primary)}
 .reward-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--radius-md);font-size:12px;font-weight:500;margin-right:6px;margin-bottom:6px}
@@ -52,7 +53,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .tab-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .tab-group+.tab-group{margin-top:6px;padding-top:6px;border-top:.5px solid var(--border)}
 .tab-group-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text-tertiary);white-space:nowrap;min-width:60px}
-.tab{padding:6px 14px;border-radius:var(--radius-md);border:.5px solid var(--border-md);font-size:13px;cursor:pointer;background:transparent;color:var(--text-secondary);font-family:inherit}
+.tab{white-space:nowrap;padding:6px 14px;border-radius:var(--radius-md);border:.5px solid var(--border-md);font-size:13px;cursor:pointer;background:transparent;color:var(--text-secondary);font-family:inherit}
 .tab:hover{background:var(--bg-secondary)}
 .tab.active{background:var(--bg-secondary);color:var(--text-primary);font-weight:500;border-color:var(--border-strong)}
 .config-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
@@ -129,7 +130,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 .earnings-box-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#1D9E75}
 .active-cfg-badge{font-size:10px;padding:2px 9px;border-radius:10px;background:var(--green-light);color:var(--green-text);font-weight:500;white-space:nowrap;display:none}
 .sub-tab-row{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap;border-bottom:.5px solid var(--border);padding-bottom:10px}
-.sub-tab{padding:4px 12px;border-radius:var(--radius-md);border:.5px solid var(--border-md);font-size:12px;cursor:pointer;background:transparent;color:var(--text-secondary);font-family:inherit}
+.sub-tab{white-space:nowrap;padding:4px 12px;border-radius:var(--radius-md);border:.5px solid var(--border-md);font-size:12px;cursor:pointer;background:transparent;color:var(--text-secondary);font-family:inherit}
 .sub-tab:hover{background:var(--bg-secondary)}
 .sub-tab.active{background:var(--green);color:#ffffff;font-weight:500;border-color:var(--green)}
 .sub-pane{display:none}
@@ -175,7 +176,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 <div class="page-wrap">
 <div class="page-header">
   <h1>Healthcare rewards simulator</h1>
-  <p>Model annual pebbles and reward earnings across habits, challenges, healthy actions, learning tracks, and step well.</p>
+  <p>Model annual pebbles and reward earnings across habits, challenges, healthy actions, learning tracks, and <span class="nb">Step-It-Up</span>.</p>
 </div>
 
 <!-- EARNINGS BOX -->
@@ -204,7 +205,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
     <div class="legend-item"><span class="legend-dot" style="background:#EF9F27"></span>Challenges: <span class="legend-pts">0 pebbles</span></div>
     <div class="legend-item"><span class="legend-dot" style="background:#378ADD"></span>Healthy actions: <span class="legend-pts">0 pebbles</span></div>
     <div class="legend-item"><span class="legend-dot" style="background:#8B5CF6"></span>Learning tracks: <span class="legend-pts">0 pebbles</span></div>
-    <div class="legend-item"><span class="legend-dot" style="background:#1D9E75"></span>Step well: <span class="legend-pts">0 pebbles</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#1D9E75"></span>Step-It-Up: <span class="legend-pts">0 pebbles</span></div>
   </div>
   <div class="cap-note" id="cap-note"></div>
   <div id="badges" style="margin-bottom:4px"></div>
@@ -218,7 +219,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
     <button class="tab" onclick="switchTab('challenges')">Challenges</button>
     <button class="tab" onclick="switchTab('learning')">Learning tracks</button>
     <button class="tab" onclick="switchTab('activities')">Healthy actions</button>
-    <button class="tab" onclick="switchTab('stepwell')">Step well</button>
+    <button class="tab" onclick="switchTab('stepwell')">Step-It-Up</button>
     <button class="tab" onclick="switchTab('redemption')">Redemption</button>
   </div>
   <div class="tab-group">
@@ -277,11 +278,11 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
   <div id="onetime-list"></div>
 </div>
 
-<!-- STEP WELL TAB -->
+<!-- STEP-IT-UP TAB -->
 <div id="tab-stepwell" class="card" style="display:none">
   <div class="card-header">
-    <p class="section-label" style="margin:0">Step well</p>
-    <div class="card-pts-summary"><p class="card-pts-label">Total pebbles earned from step well this year</p><p class="card-pts-val" id="stepwell-pts-total">0 pebbles</p></div>
+    <p class="section-label" style="margin:0">Step-It-Up</p>
+    <div class="card-pts-summary"><p class="card-pts-label">Total pebbles earned from <span class="nb">Step-It-Up</span> this year</p><p class="card-pts-val" id="stepwell-pts-total">0 pebbles</p></div>
   </div>
   <div class="row"><span class="row-label">Months completed</span><input type="range" min="0" max="12" step="1" id="sl-months-w" value="0" oninput="syncMonths('w');recalc()"><span class="row-val" id="out-months-w">0</span></div>
   <div class="row"><span class="row-label">Daily steps</span><input type="range" min="0" max="12500" step="500" id="sl-steps" value="0" oninput="recalc()"><span class="row-val" id="out-steps">0</span></div>
@@ -339,7 +340,7 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
 <div id="tab-config" class="card" style="display:none">
   <div class="sub-tab-row">
     <button class="sub-tab active" onclick="switchSubTab('cc-actions')">Healthy actions</button>
-    <button class="sub-tab" onclick="switchSubTab('cc-stepwell')">Step well</button>
+    <button class="sub-tab" onclick="switchSubTab('cc-stepwell')">Step-It-Up</button>
     <button class="sub-tab" onclick="switchSubTab('cc-thresholds')">Reward thresholds</button>
   </div>
 
@@ -354,9 +355,9 @@ input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--
     <button class="add-btn" onclick="addOneTime()" style="margin-bottom:4px">+ add action</button>
   </div>
 
-  <!-- Step well -->
+  <!-- Step-It-Up -->
   <div id="cc-stepwell" class="sub-pane">
-    <p class="section-label">Step well</p>
+    <p class="section-label">Step-It-Up</p>
     <p style="font-size:12px;color:var(--text-tertiary);margin:0 0 12px">Pebbles earned per day at each daily step threshold. A member earns the single highest threshold their step count reaches — the tiers don't stack.</p>
     <div class="config-row"><label>2,500 steps / day</label><input type="number" id="cfg-sw-2500" min="0" step="1" value="5" oninput="recalc()"><span class="unit">pebbles</span></div>
     <div class="config-row"><label>5,000 steps / day</label><input type="number" id="cfg-sw-5000" min="0" step="1" value="10" oninput="recalc()"><span class="unit">pebbles</span></div>
@@ -440,7 +441,7 @@ let oneTimeActivities=[
 let thresholds=[{pts:3000,usd:50},{pts:6000,usd:50},{pts:9000,usd:50},{pts:12000,usd:50}];
 let nextId=210, currentRewardEarned=0;
 let segmentOrder=['habits','challenges','actions','learning','stepwell'];
-const SEG_META={habits:{color:COL_HABITS,label:'Habits'},challenges:{color:COL_CHALLENGES,label:'Challenges'},actions:{color:COL_ACTIONS,label:'Healthy actions'},learning:{color:COL_LEARNING,label:'Learning tracks'},stepwell:{color:COL_STEPWELL,label:'Step well'}};
+const SEG_META={habits:{color:COL_HABITS,label:'Habits'},challenges:{color:COL_CHALLENGES,label:'Challenges'},actions:{color:COL_ACTIONS,label:'Healthy actions'},learning:{color:COL_LEARNING,label:'Learning tracks'},stepwell:{color:COL_STEPWELL,label:'Step-It-Up'}};
 
 /* ── helpers ── */
 function habitPtsEach(){const d=Math.max(0,Number(document.getElementById('cfg-habit-daily').value)||0);const w=Math.max(0,Number(document.getElementById('cfg-habit-weekly').value)||0);return(d*28)+(w*4);}
@@ -661,7 +662,7 @@ function recalc(){
   let otp=0;oneTimeActivities.forEach(a=>{if(a.excluded||!a.checked)return;if(a.gatekept&&hasGate&&!unlocked)return;otp+=a.pts;});
   const actionPts=otp;
 
-  /* step well */
+  /* Step-It-Up */
   const steps=Math.max(0,Number(document.getElementById('sl-steps').value)||0);
   const swDaily=swDailyPts(steps),swTier=swTierReached(steps);
   const swMonthly=swDaily*SW_DAYS_PER_MONTH;
@@ -669,7 +670,7 @@ function recalc(){
   document.getElementById('out-steps').textContent=steps.toLocaleString();
   document.getElementById('hint-stepwell').textContent=swTier
     ?'At '+steps.toLocaleString()+' steps/day the '+swTier.toLocaleString()+'-step tier applies — '+swDaily+' pebbles/day x '+SW_DAYS_PER_MONTH+' days = '+swMonthly.toLocaleString()+' pebbles/month'
-    :'Below the '+SW_TIERS[0].toLocaleString()+'-step tier — no step well pebbles earned';
+    :'Below the '+SW_TIERS[0].toLocaleString()+'-step tier — no Step-It-Up pebbles earned';
   document.getElementById('stepwell-pts-total').textContent=fmtPts(stepwellPts);
   renderSwLadder(steps);
 
