@@ -11,7 +11,7 @@ Simulates how a member accumulates pebbles across four earn types, then maps tho
 | **Habits** | Daily check-ins + weekly goals, plus 4/8/12-week consistency bonuses |
 | **Challenges** | Per-checkpoint pebbles + a completion bonus |
 | **Learning tracks** | Daily completion pebbles over a 10-day track + a completion bonus |
-| **Step well** | Daily step tier pebbles x 30 days per month — the highest tier reached, tiers do not stack |
+| **Step-It-Up** | Daily step tier pebbles x 30 days per month — the highest tier reached, tiers do not stack |
 | **Healthy actions** | One-time actions (screenings, exams) |
 
 Reward thresholds pay out independently as they're crossed, so total reward is the sum of every threshold reached.
